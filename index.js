@@ -116,7 +116,7 @@ class Matrix {
 
 		this.data[2][0] = (right + left) / dx
 		this.data[2][1] = (top + bottom) / dy
-		this.data[2][2] = -(near + far)  / dz
+		this.data[2][2] = -(near + far) / dz
 
 		this.data[2][3] = -1
 		this.data[3][2] = -2 * near * far / dz
@@ -136,24 +136,10 @@ var alpha = 1
 const Z_OFFSET = 5
 const TAU = Math.PI * 2
 
-
-
-
 class Model {
 	constructor(gl, model) {
-        // TODO: LOAD MODEL
-
-        // TEMP FOR STYLE :
-        this.vertices = [
-            0.5,  0.5, 0.0,  // top right
-            0.5, -0.5, 0.0,  // bottom right
-           -0.5, -0.5, 0.0,  // bottom left
-           -0.5,  0.5, 0.0,  // top left 
-        ]
-       this.indices = [  // note that we start from 0!
-           0, 1, 3,   // first triangle
-           1, 2, 3    // second triangle
-       ]  
+		this.vertices = model.vertices
+		this.indices = model.indices
 
 		this.vbo = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
@@ -173,15 +159,19 @@ class Model {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 
 		gl.enableVertexAttribArray(render_state.pos_attr)
-		gl.vertexAttribPointer(render_state.pos_attr, 3, gl.FLOAT, gl.FALSE, float_size * 3, float_size * 0)
+		gl.vertexAttribPointer(render_state.pos_attr, 3, gl.FLOAT, gl.FALSE, float_size * 8, float_size * 0)
+
+		gl.enableVertexAttribArray(render_state.normal_attr)
+		gl.vertexAttribPointer(render_state.normal_attr, 3, gl.FLOAT, gl.FALSE, float_size * 8, float_size * 3)
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0)
 
 	}
 }
 
-class Opengl_ctx {
+// WebGL setup
 
+class BigScreen {
 	constructor() {
 		// WebGL setup
 
@@ -193,16 +183,12 @@ class Opengl_ctx {
 			return
 		}
 
-		window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
-			alpha = event.matches ? 0.8 : 1
-		})
-
 		this.x_res = this.gl.drawingBufferWidth
 		this.y_res = this.gl.drawingBufferHeight
 
 		this.gl.viewport(0, 0, this.x_res, this.y_res)
 
-		this.gl.disable(this.gl.DEPTH_TEST)
+		this.gl.enable(this.gl.DEPTH_TEST)
 		this.gl.enable(this.gl.CULL_FACE)
 
 		this.gl.enable(this.gl.BLEND)
@@ -248,12 +234,11 @@ class Opengl_ctx {
 		// we have to do this for attributes too, because WebGL 1.0 limits us to older shader models
 
 		this.render_state = {
-			pos_attr:              0, // this.gl.getAttribLocation(this.program, "a_pos"),
-			normal_attr:           1, // this.gl.getAttribLocation(this.program, "a_normal"),
+			pos_attr:				0, // this.gl.getAttribLocation(this.program, "a_pos"),
+			normal_attr:			1, // this.gl.getAttribLocation(this.program, "a_normal"),
 
-			model_uniform:         this.gl.getUniformLocation(this.program, "u_model"),
-			vp_uniform:            this.gl.getUniformLocation(this.program, "u_vp"),
-
+			model_uniform:			this.gl.getUniformLocation(this.program, "u_model"),
+			vp_uniform:				this.gl.getUniformLocation(this.program, "u_vp"),
 		}
 
 		// loop
@@ -263,8 +248,8 @@ class Opengl_ctx {
 
 		this.prev = 0
 		requestAnimationFrame((now) => this.render(now))
-        
-        this.model = new Model(this.gl)
+
+		this.model = new Model(this.gl, kap_model)
 	}
 
 	render(now) {
@@ -287,7 +272,6 @@ class Opengl_ctx {
 			this.fov += (this.target_fov - this.fov) * multiplier
 		}
 
-
 		const proj_matrix = new Matrix()
 		proj_matrix.perspective(this.fov, this.y_res / this.x_res, 2, 20)
 
@@ -300,12 +284,12 @@ class Opengl_ctx {
 		vp_matrix.multiply(proj_matrix)
 
 		// model matrix
-		const model_matrix = new Matrix(identity)
 
+		const model_matrix = new Matrix(identity)
 
 		// actually render
 
-		this.gl.clearColor(0.0, 0.0, 0.0, 0.0)
+		this.gl.clearColor(0.0, 0.0, 0.0, 1.0)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
 		this.gl.useProgram(this.program)
@@ -314,15 +298,14 @@ class Opengl_ctx {
 		this.gl.uniform1f(this.render_state.alpha_uniform, alpha)
 		this.gl.uniform3f(this.render_state.vertex_indices_uniform, -1, -1, -1)
 
-        // TODO : DRAW MESH
-        this.model.draw(this.gl, this.render_state, model_matrix)
+		this.model.draw(this.gl, this.render_state, model_matrix)
 
 		requestAnimationFrame((now) => this.render(now))
 	}
 }
 
-var opengl_ctx
+var big_screen
 
 window.addEventListener("load", () => {
-	opengl_ctx = new Opengl_ctx()
+	big_screen = new BigScreen()
 }, false)

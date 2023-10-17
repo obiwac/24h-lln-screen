@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>24h vélo LLN (2023)</title>
+		<meta charset="utf-8">
+
+		<script src="index.js"></script>
+
+		<script id="vert-shader" type="x-shader/x-vertex">#version 300 es
+			precision mediump float;
+
+			void main(void) {
+			}
+		</script>
+
+		<script id="frag-shader" type="x-shader/x-fragment">#version 300 es
+			precision mediump float;
+			precision lowp int;
+
+			out vec4 frag_colour;
+
+			void main(void) {
+				frag_colour = vec4(0.0);
+			}
+		</script>
+
+		<style>
+			
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="960" height="576" />
+	</body>
+</html>

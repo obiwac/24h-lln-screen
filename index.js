@@ -6,7 +6,7 @@ class Matrix {
 	// I won't comment on the code here all that much because it's pretty much just computations
 
 	constructor(template) {
-		// if we pass a template matrix, coprev_y it
+		// if we pass a template matrix, copy it
 		// otherwise, initialize it to the 4x4 identity matrix
 
 		if (template) {
@@ -135,6 +135,62 @@ var alpha = 1
 
 const Z_OFFSET = 5
 const TAU = Math.PI * 2
+const FLOAT32_SIZE = 4
+
+class Surf {
+	constructor(gl, img_path) {
+		this.gl = gl
+
+		const verts = [ // x, y, u, v
+			-.5, -.5, 0, 0, // bottom left
+			-.5,  .5, 0, 1, // top left
+			 .5,  .5, 1, 1, // top right
+			 .5, -.5, 1, 0, // bottom right
+		]
+
+		this.indices = [0, 1, 2, 2, 3, 0]
+
+		// create quad mesh
+
+		this.vbo = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW)
+
+		this.ibo = gl.createBuffer()
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(this.indices), gl.STATIC_DRAW)
+
+		// create texture
+
+		this.tex = gl.createTexture()
+
+		const img = new Image()
+		img.src = img_path
+
+		img.onload = () => {
+			gl.bindTexture(gl.TEXTURE_2D, this.tex)
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+			// XXX don't generate mipmaps as WebGL 1.0 can be picky about non-POT textures!!
+		}
+	}
+
+	draw(render_state) {
+		this.gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
+		this.gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+
+		this.gl.enableVertexAttribArray(render_state.pos_attr)
+		this.gl.vertexAttribPointer(render_state.pos_attr, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 0)
+
+		this.gl.enableVertexAttribArray(render_state.tex_attr)
+		this.gl.vertexAttribPointer(render_state.tex_attr, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 2)
+
+		this.gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_BYTE, 0)
+	}
+}
 
 class Model {
 	constructor(gl, model) {
@@ -153,19 +209,16 @@ class Model {
 	draw(gl, render_state, model_matrix) {
 		gl.uniformMatrix4fv(render_state.model_uniform, false, model_matrix.data.flat())
 
-		const float_size = this.vertices.BYTES_PER_ELEMENT
-
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 
 		gl.enableVertexAttribArray(render_state.pos_attr)
-		gl.vertexAttribPointer(render_state.pos_attr, 3, gl.FLOAT, gl.FALSE, float_size * 8, float_size * 0)
+		gl.vertexAttribPointer(render_state.pos_attr, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 0)
 
 		gl.enableVertexAttribArray(render_state.normal_attr)
-		gl.vertexAttribPointer(render_state.normal_attr, 3, gl.FLOAT, gl.FALSE, float_size * 8, float_size * 3)
+		gl.vertexAttribPointer(render_state.normal_attr, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0)
-
 	}
 }
 

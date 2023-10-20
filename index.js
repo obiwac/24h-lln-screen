@@ -113,7 +113,6 @@ class Matrix {
 var identity = new Matrix()
 var alpha = 1
 
-const Z_OFFSET = 5
 const TAU = Math.PI * 2
 const FLOAT32_SIZE = 4
 
@@ -300,7 +299,7 @@ class BigScreen {
 		this.fov = TAU / 5
 
 		this.prev = 0
-		requestAnimationFrame((now) => this.render(now))
+		requestAnimationFrame(now => this.render(now))
 
 		this.model = new Model(this.gl, kap_model)
 	}
@@ -330,15 +329,18 @@ class BigScreen {
 
 		const view_matrix = new Matrix()
 
-		view_matrix.translate(0, 0, -Z_OFFSET)
-		view_matrix.rotate_2d(time, 0)
+		const dist = 15
+		view_matrix.translate(0, 0, -dist)
 
 		const vp_matrix = new Matrix(view_matrix)
 		vp_matrix.multiply(proj_matrix)
 
 		// model matrix
 
+		const frustum_slope = Math.tan(this.fov / 2)
+
 		const model_matrix = new Matrix(identity)
+		model_matrix.translate(Math.sin(time) * frustum_slope * dist / 1.15, 0, 0)
 
 		// actually render
 

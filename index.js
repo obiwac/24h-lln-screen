@@ -98,35 +98,15 @@ class Matrix {
 		this.rotate(-pitch, Math.cos(yaw), 0, Math.sin(yaw))
 	}
 
-	frustum(left, right, bottom, top, near, far) {
-		const dx = right - left
-		const dy = top - bottom
-		const dz = far - near
+	perspective(fov, near, far) {
+		const scale = 1 / Math.tan(fov / 2)
 
-		// clear out matrix
-
-		for (let i = 0; i < 4; i++) {
-			for (let j = 0; j < 4; j++) {
-				this.data[i][j] = 0
-			}
-		}
-
-		this.data[0][0] = 2 * near / dx
-		this.data[1][1] = 2 * near / dy
-
-		this.data[2][0] = (right + left) / dx
-		this.data[2][1] = (top + bottom) / dy
-		this.data[2][2] = -(near + far) / dz
-
+		this.data[0][0] = scale
+		this.data[1][1] = scale
+		this.data[2][2] = -far / (far - near)
+		this.data[3][2] = -far * near / (far - near)
 		this.data[2][3] = -1
-		this.data[3][2] = -2 * near * far / dz
-	}
-
-	perspective(fovy, aspect, near, far) {
-		let y = Math.tan(fovy / 2) / 2
-		let x = y / aspect
-
-		this.frustum(-x * near, x * near, -y * near, y * near, near, far)
+		this.data[3][3] = 0
 	}
 }
 

@@ -283,6 +283,18 @@ class Dvd {
 		this.theta = TAU / 6
 	}
 
+	keypress(key) {
+		if (key === "f") {
+			// TODO cheat and target a corner
+			// only do this on next bounce so it doesn't look too obvious the direction has changed
+			// target the corner closest to where the next intersection is gonna be (simple atan2)
+
+			return true
+		}
+
+		return false
+	}
+
 	render(dt, time) {
 		const dist = 15
 		const frustum_slope = Math.tan(this.fov / 2)
@@ -371,7 +383,9 @@ class BigScreen {
 
 		this.state = "dvd"
 
-		this.dvd = new Dvd(this.gl)
+		this.renderers = {
+			"dvd": new Dvd(this.gl)
+		}
 
 		window.addEventListener("keypress", e => {
 			// don't process key presses if modifying CSE warning message
@@ -380,7 +394,13 @@ class BigScreen {
 				return
 			}
 
-			// TODO make sure the current state doesn't handle this key
+			// make sure the current state doesn't handle this key
+
+			const renderer = this.renderers[this.state]
+
+			if (renderer && renderer.keypress && renderer.keypress(e.key)) {
+				return
+			}
 
 			this.change_state(e.key)
 		})
@@ -394,7 +414,7 @@ class BigScreen {
 	change_state(key) {
 		// disable overlay of previous state
 
-		if (OVERLAYS[this.state] !== undefined) {
+		if (OVERLAYS[this.state]) {
 			const overlay = document.getElementById(OVERLAYS[this.state])
 			overlay.hidden = true
 		}
@@ -420,7 +440,7 @@ class BigScreen {
 
 		// enable overlay of new state
 
-		if (OVERLAYS[this.state] !== undefined) {
+		if (OVERLAYS[this.state]) {
 			const overlay = document.getElementById(OVERLAYS[this.state])
 			overlay.hidden = false
 		}
@@ -433,22 +453,16 @@ class BigScreen {
 		const time = now / 1000
 
 		let colour = [0, 0, 0]
-		let renderer = this.dvd
-
-		if (this.state === "cse-edit") {
-			renderer = undefined
-		}
 
 		if (this.state === "cse") {
 			colour = [1, 1, 0]
-			renderer = undefined
 		}
 
 		this.gl.clearColor(...colour, 1)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-		if (renderer) {
-			renderer.render(dt, time)
+		if (this.renderers[this.state]) {
+			this.renderers[this.state].render(dt, time)
 		}
 
 		requestAnimationFrame((now) => this.render(now))

@@ -205,17 +205,15 @@ class Model {
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW)
 	}
 
-	draw(gl, render_state, model_matrix) {
-		gl.uniformMatrix4fv(render_state.model_uniform, false, model_matrix.data.flat())
-
+	draw(gl) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 
-		gl.enableVertexAttribArray(render_state.pos_attr)
-		gl.vertexAttribPointer(render_state.pos_attr, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 0)
+		gl.enableVertexAttribArray(0)
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 0)
 
-		gl.enableVertexAttribArray(render_state.normal_attr)
-		gl.vertexAttribPointer(render_state.normal_attr, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
+		gl.enableVertexAttribArray(1)
+		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0)
 	}
@@ -268,6 +266,55 @@ class Shader {
 	}
 }
 
+class Dvd {
+	constructor(gl) {
+		this.gl = gl
+		this.shader = new Shader(this.gl, "kap")
+
+		this.model_uniform = this.gl.getUniformLocation(this.shader.program, "u_model")
+		this.vp_uniform = this.gl.getUniformLocation(this.shader.program, "u_vp")
+
+		this.fov = TAU / 4
+		this.model = new Model(this.gl, kap_model)
+
+		this.x = 0
+		this.y = 0
+
+		this.theta = TAU / 8
+	}
+
+	render(dt, time) {
+		const vx = Math.cos(this.theta)
+		const vy = Math.sin(this.theta)
+
+		this.x += vx * dt
+		this.y += vy * dt
+
+		const proj_matrix = new Matrix()
+		proj_matrix.perspective(this.fov, 2, 20)
+
+		const view_matrix = new Matrix()
+
+		const dist = 15
+		view_matrix.translate(0, 0, -dist)
+
+		const vp_matrix = new Matrix(view_matrix)
+		vp_matrix.multiply(proj_matrix)
+
+		const frustum_slope = Math.tan(this.fov / 2)
+
+		const model_matrix = new Matrix(identity)
+		model_matrix.translate(Math.sin(time) * frustum_slope * dist / 1.15, 0, 0)
+
+		this.shader.use()
+
+		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
+		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())
+
+		this.model.draw(this.gl)
+	}
+}
+
 class BigScreen {
 	constructor() {
 		// WebGL setup
@@ -291,81 +338,45 @@ class BigScreen {
 		this.gl.enable(this.gl.BLEND)
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
 
-		this.surf_shader = new Shader(this.gl, "kap")
-		this.kap_shader = new Shader(this.gl, "kap")
+		// different states
 
-		// get attribute & uniform locations from program
-		// we have to do this for attributes too, because WebGL 1.0 limits us to older shader models
+		this.state = "dvd"
 
-		this.render_state = {
-			pos_attr:		0, // this.gl.getAttribLocation(this.program, "a_pos"),
-			normal_attr:	1, // this.gl.getAttribLocation(this.program, "a_normal"),
+		this.dvd = new Dvd(this.gl)
 
-			model_uniform:	this.gl.getUniformLocation(this.program, "u_model"),
-			vp_uniform:		this.gl.getUniformLocation(this.program, "u_vp"),
-		}
+		window.addEventListener("keypress", e => {
+			if (e.key === "c") {
+				this.state = "cse"
+			}
+
+			else {
+				this.state = "dvd"
+			}
+		})
 
 		// loop
 
-		this.target_fov = TAU / 4
-		this.fov = TAU / 5
-
 		this.prev = 0
 		requestAnimationFrame(now => this.render(now))
-
-		this.model = new Model(this.gl, kap_model)
 	}
 
 	render(now) {
-		// timing
-
 		const dt = (now - this.prev) / 1000
 		this.prev = now
 
 		const time = now / 1000
 
-		// create matrices
+		let colour = [0, 0, 0]
+		let renderer = this.dvd
 
-		let multiplier = dt * 5
-
-		if (multiplier > 1) {
-			this.fov = this.target_fov
+		if (this.state === "cse") {
+			colour = [1, 1, 0]
 		}
 
-		else {
-			this.fov += (this.target_fov - this.fov) * multiplier
-		}
-
-		const proj_matrix = new Matrix()
-		proj_matrix.perspective(this.fov, this.y_res / this.x_res, 2, 20)
-
-		const view_matrix = new Matrix()
-
-		const dist = 15
-		view_matrix.translate(0, 0, -dist)
-
-		const vp_matrix = new Matrix(view_matrix)
-		vp_matrix.multiply(proj_matrix)
-
-		// model matrix
-
-		const frustum_slope = Math.tan(this.fov / 2)
-
-		const model_matrix = new Matrix(identity)
-		model_matrix.translate(Math.sin(time) * frustum_slope * dist / 1.15, 0, 0)
-
-		// actually render
-
-		this.gl.clearColor(0.0, 0.0, 0.0, 1.0)
+		this.gl.clearColor(...colour, 1)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-		this.kap_shader.use()
-		this.gl.uniformMatrix4fv(this.render_state.vp_uniform, false, vp_matrix.data.flat())
-
-		this.gl.uniform1f(this.render_state.alpha_uniform, alpha)
-		this.gl.uniform3f(this.render_state.vertex_indices_uniform, -1, -1, -1)
-
-		this.model.draw(this.gl, this.render_state, model_matrix)
+		renderer.render(dt, time)
 
 		requestAnimationFrame((now) => this.render(now))
 	}

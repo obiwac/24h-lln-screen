@@ -280,31 +280,51 @@ class Dvd {
 		this.x = 0
 		this.y = 0
 
-		this.theta = TAU / 8
+		this.theta = TAU / 6
 	}
 
 	render(dt, time) {
+		const dist = 15
+		const frustum_slope = Math.tan(this.fov / 2)
+
+		// find where we should move the logo
+
 		const vx = Math.cos(this.theta)
 		const vy = Math.sin(this.theta)
 
-		this.x += vx * dt
-		this.y += vy * dt
+		this.x += vx * dt * 0.3
+		this.y += vy * dt * 0.3
+
+		if (
+			this.y > 1 - this.model.max_y / frustum_slope / dist ||
+			this.y < -1 - this.model.min_y / frustum_slope / dist
+		) {
+			this.theta = -this.theta
+		}
+
+		if (
+			this.x > 1 - this.model.max_x / frustum_slope / dist ||
+			this.x < -1 - this.model.min_x / frustum_slope / dist
+		) {
+			this.theta = TAU / 2 - this.theta
+		}
+
+		// matrix stuff
 
 		const proj_matrix = new Matrix()
 		proj_matrix.perspective(this.fov, 2, 20)
 
 		const view_matrix = new Matrix()
 
-		const dist = 15
 		view_matrix.translate(0, 0, -dist)
 
 		const vp_matrix = new Matrix(view_matrix)
 		vp_matrix.multiply(proj_matrix)
 
-		const frustum_slope = Math.tan(this.fov / 2)
-
 		const model_matrix = new Matrix(identity)
-		model_matrix.translate(Math.sin(time) * frustum_slope * dist / 1.15, 0, 0)
+		model_matrix.translate(this.x * frustum_slope * dist, this.y * frustum_slope * dist, 0)
+
+		// actual rendering
 
 		this.shader.use()
 
@@ -359,6 +379,8 @@ class BigScreen {
 			if (this.state === "cse-edit") {
 				return
 			}
+
+			// TODO make sure the current state doesn't handle this key
 
 			this.change_state(e.key)
 		})

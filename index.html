@@ -24,7 +24,7 @@
 			.cse-warning {
 				display: flex;
 				align-items: center;
-				justify-content: center;
+				justify-content: space-around;
 				flex-direction: column;
 				color: red;
 			}
@@ -84,8 +84,6 @@
 			out vec3 pos;
 			out vec4 world_pos;
 			out vec3 colour;
-
-			#define TAU 6.28318
 
 			void main(void) {
 				pos = a_pos;

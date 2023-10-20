@@ -116,7 +116,13 @@
 
 		<div class="overlay cse-warning" id="cse-warning" hidden>
 			<h3>Avertissement du CSE</h3>
-			<h1>Ceci est un message de test</h1>
+			<h1 id="cse-warning-text"></h1>
+		</div>
+
+		<div class="overlay cse-warning" id="cse-edit-warning" hidden>
+			<h3>Modifier l'avertissement du CSE</h3>
+			<input type="text" id="cse-warning-input" value="Ceci est un message de test"></input>
+			<button onclick="big_screen.change_state('c')">Afficher le message</button>
 		</div>
 	</body>
 </html>

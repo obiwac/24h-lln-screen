@@ -319,6 +319,7 @@ class Dvd {
 
 const OVERLAYS = {
 	"cse": "cse-warning",
+	"cse-edit": "cse-edit-warning",
 }
 
 class BigScreen {
@@ -353,35 +354,54 @@ class BigScreen {
 		this.dvd = new Dvd(this.gl)
 
 		window.addEventListener("keypress", e => {
-			// disable overlay of previous state
+			// don't process key presses if modifying CSE warning message
 
-			if (OVERLAYS[this.state] !== undefined) {
-				const overlay = document.getElementById(OVERLAYS[this.state])
-				overlay.hidden = true
+			if (this.state === "cse-edit") {
+				return
 			}
 
-			// set new state
-
-			if (e.key === "c") {
-				this.state = "cse"
-			}
-
-			else {
-				this.state = "dvd"
-			}
-
-			// enable overlay of new state
-
-			if (OVERLAYS[this.state] !== undefined) {
-				const overlay = document.getElementById(OVERLAYS[this.state])
-				overlay.hidden = false
-			}
+			this.change_state(e.key)
 		})
 
 		// loop
 
 		this.prev = 0
 		requestAnimationFrame(now => this.render(now))
+	}
+
+	change_state(key) {
+		// disable overlay of previous state
+
+		if (OVERLAYS[this.state] !== undefined) {
+			const overlay = document.getElementById(OVERLAYS[this.state])
+			overlay.hidden = true
+		}
+
+		// set new state
+
+		if (key === "e") {
+			this.state = "cse-edit"
+		}
+
+		else if (key === "c") {
+			this.state = "cse"
+
+			const warning_text = document.getElementById("cse-warning-text")
+			const warning_input = document.getElementById("cse-warning-input")
+
+			warning_text.innerText = warning_input.value
+		}
+
+		else {
+			this.state = "dvd"
+		}
+
+		// enable overlay of new state
+
+		if (OVERLAYS[this.state] !== undefined) {
+			const overlay = document.getElementById(OVERLAYS[this.state])
+			overlay.hidden = false
+		}
 	}
 
 	render(now) {
@@ -392,6 +412,10 @@ class BigScreen {
 
 		let colour = [0, 0, 0]
 		let renderer = this.dvd
+
+		if (this.state === "cse-edit") {
+			renderer = undefined
+		}
 
 		if (this.state === "cse") {
 			colour = [1, 1, 0]

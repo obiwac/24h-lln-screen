@@ -177,6 +177,26 @@ class Model {
 		this.vertices = model.vertices
 		this.indices = model.indices
 
+		this.max_x = 0
+		this.max_y = 0
+
+		this.min_x = 0
+		this.min_y = 0
+
+		for (let i = 0; i < this.vertices.length / 8; i++) {
+			const x = this.vertices[i * 8 + 0]
+			const y = this.vertices[i * 8 + 1]
+			// const z = this.vertices[i * 8 + 2]
+
+			this.vertices[i * 8 + 2] = this.vertices[i * 8 + 2] * 0.5
+
+			this.max_x = Math.max(this.max_x, x)
+			this.max_y = Math.max(this.max_y, y)
+
+			this.min_x = Math.min(this.min_x, x)
+			this.min_y = Math.min(this.min_y, y)
+		}
+
 		this.vbo = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW)

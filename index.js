@@ -223,37 +223,15 @@ class Model {
 
 // WebGL setup
 
-class BigScreen {
-	constructor() {
-		// WebGL setup
-
-		const canvas = document.getElementById("canvas")
-		this.gl = canvas.getContext("webgl2") || canvas.getContext("experimental-webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
-
-		if (!this.gl || (!(this.gl instanceof WebGLRenderingContext) && !(this.gl instanceof WebGL2RenderingContext))) {
-			canvas.hidden = true
-			return
-		}
-
-		this.x_res = this.gl.drawingBufferWidth
-		this.y_res = this.gl.drawingBufferHeight
-
-		this.gl.viewport(0, 0, this.x_res, this.y_res)
-
-		this.gl.enable(this.gl.DEPTH_TEST)
-		this.gl.enable(this.gl.CULL_FACE)
-
-		this.gl.enable(this.gl.BLEND)
-		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
-
-		// load shader program
-		// again, nothing interesting to comment on, this is all basically boilerplate
+class Shader {
+	constructor(gl, vert_id, frag_id) {
+		this.gl = gl
 
 		const vert_shader = this.gl.createShader(this.gl.VERTEX_SHADER)
 		const frag_shader = this.gl.createShader(this.gl.FRAGMENT_SHADER)
 
-		this.gl.shaderSource(vert_shader, document.getElementById("vert-shader").innerHTML)
-		this.gl.shaderSource(frag_shader, document.getElementById("frag-shader").innerHTML)
+		this.gl.shaderSource(vert_shader, document.getElementById(vert_id).innerHTML)
+		this.gl.shaderSource(frag_shader, document.getElementById(frag_id).innerHTML)
 
 		this.gl.compileShader(vert_shader)
 		this.gl.compileShader(frag_shader)
@@ -279,8 +257,38 @@ class BigScreen {
 			console.error(vert_compilation_log)
 			console.error(frag_compilation_log)
 			console.error(log)
-			canvas.hidden = true
 		}
+	}
+
+	use() {
+		this.gl.useProgram(this.program)
+	}
+}
+
+class BigScreen {
+	constructor() {
+		// WebGL setup
+
+		const canvas = document.getElementById("canvas")
+		this.gl = canvas.getContext("webgl2") || canvas.getContext("experimental-webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
+
+		if (!this.gl || (!(this.gl instanceof WebGLRenderingContext) && !(this.gl instanceof WebGL2RenderingContext))) {
+			canvas.hidden = true
+			return
+		}
+
+		this.x_res = this.gl.drawingBufferWidth
+		this.y_res = this.gl.drawingBufferHeight
+
+		this.gl.viewport(0, 0, this.x_res, this.y_res)
+
+		this.gl.enable(this.gl.DEPTH_TEST)
+		this.gl.enable(this.gl.CULL_FACE)
+
+		this.gl.enable(this.gl.BLEND)
+		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
+
+		this.shader = new Shader(this.gl, "vert-shader", "frag-shader")
 
 		// get attribute & uniform locations from program
 		// we have to do this for attributes too, because WebGL 1.0 limits us to older shader models
@@ -347,7 +355,7 @@ class BigScreen {
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-		this.gl.useProgram(this.program)
+		this.shader.use()
 		this.gl.uniformMatrix4fv(this.render_state.vp_uniform, false, vp_matrix.data.flat())
 
 		this.gl.uniform1f(this.render_state.alpha_uniform, alpha)

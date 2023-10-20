@@ -315,6 +315,12 @@ class Dvd {
 	}
 }
 
+// map of state names to HTML overlay element's id
+
+const OVERLAYS = {
+	"cse": "cse-warning",
+}
+
 class BigScreen {
 	constructor() {
 		// WebGL setup
@@ -339,18 +345,36 @@ class BigScreen {
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
 
 		// different states
+		// - dvd: bouncing DVD "KAP" logo (default)
+		// - cse: warning or message issued by the CSE Animations
 
 		this.state = "dvd"
 
 		this.dvd = new Dvd(this.gl)
 
 		window.addEventListener("keypress", e => {
+			// disable overlay of previous state
+
+			if (OVERLAYS[this.state] !== undefined) {
+				const overlay = document.getElementById(OVERLAYS[this.state])
+				overlay.hidden = true
+			}
+
+			// set new state
+
 			if (e.key === "c") {
 				this.state = "cse"
 			}
 
 			else {
 				this.state = "dvd"
+			}
+
+			// enable overlay of new state
+
+			if (OVERLAYS[this.state] !== undefined) {
+				const overlay = document.getElementById(OVERLAYS[this.state])
+				overlay.hidden = false
 			}
 		})
 
@@ -371,12 +395,15 @@ class BigScreen {
 
 		if (this.state === "cse") {
 			colour = [1, 1, 0]
+			renderer = undefined
 		}
 
 		this.gl.clearColor(...colour, 1)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-		renderer.render(dt, time)
+		if (renderer) {
+			renderer.render(dt, time)
+		}
 
 		requestAnimationFrame((now) => this.render(now))
 	}

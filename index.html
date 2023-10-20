@@ -15,9 +15,24 @@
 				overflow: hidden;
 			}
 
-			canvas {
+			.overlay {
 				width: 100vw;
 				height: 100vh;
+				position: absolute;
+			}
+
+			.cse-warning {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				color: red;
+			}
+
+			/* XXX yeah a little hacky ig */
+
+			div[hidden] {
+				display: none;
 			}
 		</style>
 
@@ -97,6 +112,11 @@
 	</head>
 	<body>
 		<!-- TODO confirm resolution -->
-		<canvas id="canvas" width="960" height="576" />
+		<canvas id="canvas" class="overlay" width="960" height="576"></canvas>
+
+		<div class="overlay cse-warning" id="cse-warning" hidden>
+			<h3>Avertissement du CSE</h3>
+			<h1>Ceci est un message de test</h1>
+		</div>
 	</body>
 </html>

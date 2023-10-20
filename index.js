@@ -224,8 +224,11 @@ class Model {
 // WebGL setup
 
 class Shader {
-	constructor(gl, vert_id, frag_id) {
+	constructor(gl, id) {
 		this.gl = gl
+
+		const vert_id = `${id}-vert`
+		const frag_id = `${id}-frag`
 
 		const vert_shader = this.gl.createShader(this.gl.VERTEX_SHADER)
 		const frag_shader = this.gl.createShader(this.gl.FRAGMENT_SHADER)
@@ -288,17 +291,18 @@ class BigScreen {
 		this.gl.enable(this.gl.BLEND)
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
 
-		this.shader = new Shader(this.gl, "vert-shader", "frag-shader")
+		this.surf_shader = new Shader(this.gl, "kap")
+		this.kap_shader = new Shader(this.gl, "kap")
 
 		// get attribute & uniform locations from program
 		// we have to do this for attributes too, because WebGL 1.0 limits us to older shader models
 
 		this.render_state = {
-			pos_attr:				0, // this.gl.getAttribLocation(this.program, "a_pos"),
-			normal_attr:			1, // this.gl.getAttribLocation(this.program, "a_normal"),
+			pos_attr:		0, // this.gl.getAttribLocation(this.program, "a_pos"),
+			normal_attr:	1, // this.gl.getAttribLocation(this.program, "a_normal"),
 
-			model_uniform:			this.gl.getUniformLocation(this.program, "u_model"),
-			vp_uniform:				this.gl.getUniformLocation(this.program, "u_vp"),
+			model_uniform:	this.gl.getUniformLocation(this.program, "u_model"),
+			vp_uniform:		this.gl.getUniformLocation(this.program, "u_vp"),
 		}
 
 		// loop
@@ -355,7 +359,7 @@ class BigScreen {
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-		this.shader.use()
+		this.kap_shader.use()
 		this.gl.uniformMatrix4fv(this.render_state.vp_uniform, false, vp_matrix.data.flat())
 
 		this.gl.uniform1f(this.render_state.alpha_uniform, alpha)

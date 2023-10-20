@@ -8,7 +8,56 @@
 		<script src="models/kap.js"></script>
 		<script src="index.js"></script>
 
-		<script id="vert-shader" type="x-shader/x-vertex">#version 300 es
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+
+			canvas {
+				width: 100vw;
+				height: 100vh;
+			}
+		</style>
+
+		<!-- surface shader -->
+
+		<script id="surf-vert" type="x-shader/x-vertex">#version 300 es
+			precision mediump float;
+
+			layout(location = 0) in vec2 a_pos;
+			layout(location = 1) in vec2 a_tex;
+
+			uniform vec2 scale;
+			uniform vec2 pos;
+
+			out vec3 tex_coord;
+
+			void main(void) {
+				tex_coord = a_tex_coord;
+				gl_Position = scale * a_pos + pos;
+			}
+		</script>
+
+		<script id="surf-frag" type="x-shader/x-fragment">#version 300 es
+			precision mediump float;
+			precision lowp int;
+
+			in vec3 pos;
+			in vec4 world_pos;
+			in vec3 colour;
+
+			out vec4 frag_colour;
+
+			void main(void) {
+				frag_colour = vec4(colour / 2.0 + 0.5, 1.0);
+			}
+		</script>
+
+		<!-- KAP shader -->
+
+		<script id="kap-vert" type="x-shader/x-vertex">#version 300 es
 			precision mediump float;
 
 			layout(location = 0) in vec3 a_pos;
@@ -31,7 +80,7 @@
 			}
 		</script>
 
-		<script id="frag-shader" type="x-shader/x-fragment">#version 300 es
+		<script id="kap-frag" type="x-shader/x-fragment">#version 300 es
 			precision mediump float;
 			precision lowp int;
 
@@ -45,19 +94,6 @@
 				frag_colour = vec4(colour / 2.0 + 0.5, 1.0);
 			}
 		</script>
-
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-				overflow: hidden;
-			}
-
-			canvas {
-				width: 100vw;
-				height: 100vh;
-			}
-		</style>
 	</head>
 	<body>
 		<!-- TODO confirm resolution -->

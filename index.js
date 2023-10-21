@@ -281,6 +281,10 @@ class Shader {
 		}
 	}
 
+	uniform(name) {
+		return this.gl.getUniformLocation(this.program, name)
+	}
+
 	use() {
 		this.gl.useProgram(this.program)
 	}
@@ -291,8 +295,8 @@ class Dvd {
 		this.gl = gl
 		this.shader = new Shader(this.gl, "kap")
 
-		this.model_uniform = this.gl.getUniformLocation(this.shader.program, "u_model")
-		this.vp_uniform = this.gl.getUniformLocation(this.shader.program, "u_vp")
+		this.model_uniform = this.shader.uniform("u_model")
+		this.vp_uniform = this.shader.uniform("u_vp")
 
 		this.fov = TAU / 4
 		this.model = new Model(this.gl, kap_model)
@@ -376,11 +380,12 @@ class Radio {
 		this.gl = gl
 		this.shader = new Shader(this.gl, "fullbright")
 
-		this.model_uniform = this.gl.getUniformLocation(this.shader.program, "u_model")
-		this.vp_uniform = this.gl.getUniformLocation(this.shader.program, "u_vp")
+		this.model_uniform = this.shader.uniform("u_model")
+		this.vp_uniform = this.shader.uniform("u_vp")
+		this.texture_uniform = this.shader.uniform("u_tex")
 
 		this.model = new Model(this.gl, radio_model)
-		this.texture = new Texture()
+		this.texture = new Texture(this.gl, "res/radio.png")
 	}
 
 	render(_dt, time) {
@@ -394,6 +399,7 @@ class Radio {
 		vp_matrix.multiply(proj_matrix)
 
 		const model_matrix = new Matrix(identity)
+		model_matrix.translate(0, -3, 0)
 		model_matrix.scale(50, 50, 50)
 		model_matrix.rotate_2d(time, 0)
 
@@ -404,6 +410,7 @@ class Radio {
 		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
 		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())
 
+		this.texture.use(this.texture_uniform)
 		this.model.draw(this.gl)
 	}
 }

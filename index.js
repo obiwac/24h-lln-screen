@@ -299,7 +299,11 @@ class Dvd {
 		const dist = 15
 		const frustum_slope = Math.tan(this.fov / 2)
 
-		// find where we should move the logo
+		// find where we should move the logo and handle bouncing off edges
+		// TODO lighting
+		// TODO changing colours
+		// TODO cool little rotation animation each time the logo hits an edge
+		// TODO cycle through colours of the rainbow when we hit corner
 
 		const vx = Math.cos(this.theta)
 		const vy = Math.sin(this.theta)

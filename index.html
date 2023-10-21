@@ -5,9 +5,12 @@
 		<title>24h vélo LLN (2023)</title>
 		<meta charset="utf-8">
 
+		<script src="index.js"></script>
+
+		<!-- models -->
+
 		<script src="models/kap.js"></script>
 		<script src="models/radio.js"></script>
-		<script src="index.js"></script>
 
 		<style>
 			body {
@@ -87,7 +90,7 @@
 			precision mediump float;
 
 			layout(location = 0) in vec3 a_pos;
-			layout(location = 1) in vec3 a_normal;
+			layout(location = 2) in vec3 a_normal;
 
 			uniform mat4 u_model;
 			uniform mat4 u_vp;
@@ -125,7 +128,7 @@
 			precision mediump float;
 
 			layout(location = 0) in vec3 a_pos;
-			layout(location = 2) in vec2 a_tex_coord;
+			layout(location = 1) in vec2 a_tex_coord;
 
 			uniform mat4 u_model;
 			uniform mat4 u_vp;
@@ -142,14 +145,14 @@
 			precision mediump float;
 			precision lowp int;
 
-			uniform sampler2D tex;
+			uniform sampler2D u_tex;
 
 			in vec2 tex_coord;
 
 			out vec4 frag_colour;
 
 			void main(void) {
-				frag_colour = texture(tex, tex_coord);
+				frag_colour = texture(u_tex, tex_coord);
 			}
 		</script>
 

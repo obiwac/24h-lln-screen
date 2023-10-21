@@ -116,6 +116,36 @@ var alpha = 1
 const TAU = Math.PI * 2
 const FLOAT32_SIZE = 4
 
+class Texture {
+	constructor(gl, img_path) {
+		this.gl = gl
+		this.tex = gl.createTexture()
+
+		const img = new Image()
+
+		img.onload = () => {
+			gl.bindTexture(gl.TEXTURE_2D, this.tex)
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+			gl.generateMipmap(gl.TEXTURE_2D)
+		}
+
+		img.src = img_path
+	}
+
+	use(uniform) {
+		const slot = 0
+
+		this.gl.activeTexture(this.gl.TEXTURE0 + slot)
+		this.gl.uniform1i(uniform, slot)
+
+		this.gl.bindTexture(this.gl.TEXTURE_2D, this.tex)
+	}
+}
+
 class Surf {
 	constructor(gl, img_path) {
 		this.gl = gl
@@ -141,31 +171,20 @@ class Surf {
 
 		// create texture
 
-		this.tex = gl.createTexture()
-
-		const img = new Image()
-		img.src = img_path
-
-		img.onload = () => {
-			gl.bindTexture(gl.TEXTURE_2D, this.tex)
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
-
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-			// XXX don't generate mipmaps as WebGL 1.0 can be picky about non-POT textures!!
-		}
+		this.texture = Texture(gl, img_path)
 	}
 
-	draw(render_state) {
+	draw(texture_uniform) {
+		this.texture.use(texture_uniform)
+
 		this.gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
 		this.gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 
-		this.gl.enableVertexAttribArray(render_state.pos_attr)
-		this.gl.vertexAttribPointer(render_state.pos_attr, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 0)
+		this.gl.enableVertexAttribArray(0)
+		this.gl.vertexAttribPointer(0, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 0)
 
-		this.gl.enableVertexAttribArray(render_state.tex_attr)
-		this.gl.vertexAttribPointer(render_state.tex_attr, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 2)
+		this.gl.enableVertexAttribArray(1)
+		this.gl.vertexAttribPointer(1, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 2)
 
 		this.gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_BYTE, 0)
 	}
@@ -211,10 +230,10 @@ class Model {
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 0)
 
 		gl.enableVertexAttribArray(1)
-		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
+		gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
 
 		gl.enableVertexAttribArray(2)
-		gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 6)
+		gl.vertexAttribPointer(2, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 5)
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0)
 	}

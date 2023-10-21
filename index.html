@@ -6,6 +6,7 @@
 		<meta charset="utf-8">
 
 		<script src="models/kap.js"></script>
+		<script src="models/radio.js"></script>
 		<script src="index.js"></script>
 
 		<style>
@@ -52,12 +53,12 @@
 			precision mediump float;
 
 			layout(location = 0) in vec2 a_pos;
-			layout(location = 1) in vec2 a_tex;
+			layout(location = 1) in vec2 a_tex_coord;
 
 			uniform vec2 scale;
 			uniform vec2 pos;
 
-			out vec3 tex_coord;
+			out vec2 tex_coord;
 
 			void main(void) {
 				tex_coord = a_tex_coord;
@@ -117,6 +118,41 @@
 				frag_colour = vec4(colour / 2.0 + 0.5, 1.0);
 			}
 		</script>
+
+		<!-- fullbright shader -->
+
+		<script id="fullbright-vert" type="x-shader/x-vertex">#version 300 es
+			precision mediump float;
+
+			layout(location = 0) in vec3 a_pos;
+			layout(location = 2) in vec2 a_tex_coord;
+
+			uniform mat4 u_model;
+			uniform mat4 u_vp;
+
+			out vec2 tex_coord;
+
+			void main(void) {
+				gl_Position = u_vp * u_model * vec4(a_pos, 1.0);
+				tex_coord = a_tex_coord;
+			}
+		</script>
+
+		<script id="fullbright-frag" type="x-shader/x-fragment">#version 300 es
+			precision mediump float;
+			precision lowp int;
+
+			uniform sampler2D tex;
+
+			in vec2 tex_coord;
+
+			out vec4 frag_colour;
+
+			void main(void) {
+				frag_colour = texture(tex, tex_coord);
+			}
+		</script>
+
 	</head>
 	<body>
 		<!-- TODO confirm resolution -->

@@ -187,8 +187,6 @@ class Model {
 			const y = this.vertices[i * 8 + 1]
 			// const z = this.vertices[i * 8 + 2]
 
-			this.vertices[i * 8 + 2] = this.vertices[i * 8 + 2] * 0.5
-
 			this.max_x = Math.max(this.max_x, x)
 			this.max_y = Math.max(this.max_y, y)
 
@@ -214,6 +212,9 @@ class Model {
 
 		gl.enableVertexAttribArray(1)
 		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
+
+		gl.enableVertexAttribArray(2)
+		gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 6)
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0)
 	}
@@ -331,14 +332,51 @@ class Dvd {
 		proj_matrix.perspective(this.fov, 2, 20)
 
 		const view_matrix = new Matrix()
-
 		view_matrix.translate(0, 0, -dist)
 
 		const vp_matrix = new Matrix(view_matrix)
 		vp_matrix.multiply(proj_matrix)
 
 		const model_matrix = new Matrix(identity)
+		model_matrix.scale(1, 1, 0.5)
 		model_matrix.translate(this.x * frustum_slope * dist, this.y * frustum_slope * dist, 0)
+
+		// actual rendering
+
+		this.shader.use()
+
+		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
+		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())
+
+		this.model.draw(this.gl)
+	}
+}
+
+class Radio {
+	constructor(gl) {
+		this.gl = gl
+		this.shader = new Shader(this.gl, "fullbright")
+
+		this.model_uniform = this.gl.getUniformLocation(this.shader.program, "u_model")
+		this.vp_uniform = this.gl.getUniformLocation(this.shader.program, "u_vp")
+
+		this.model = new Model(this.gl, radio_model)
+		this.texture = new Texture()
+	}
+
+	render(_dt, time) {
+		const proj_matrix = new Matrix()
+		proj_matrix.perspective(TAU / 4, 2, 20)
+
+		const view_matrix = new Matrix()
+		view_matrix.translate(0, 0, -15)
+
+		const vp_matrix = new Matrix(view_matrix)
+		vp_matrix.multiply(proj_matrix)
+
+		const model_matrix = new Matrix(identity)
+		model_matrix.scale(50, 50, 50)
+		model_matrix.rotate_2d(time, 0)
 
 		// actual rendering
 
@@ -451,6 +489,7 @@ class BigScreen {
 			"guindaille": new Guindaille(),
 			"sacha": new Sacha(),
 			"infeau": new Infeau(),
+			"radio": new Radio(this.gl),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -497,6 +536,7 @@ class BigScreen {
 		else if (key === "g") this.state = "guindaille"
 		else if (key === "s") this.state = "sacha"
 		else if (key === "i") this.state = "infeau"
+		else if (key === "r") this.state = "radio"
 		else this.state = "dvd"
 
 		// enable new state

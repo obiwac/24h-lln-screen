@@ -370,11 +370,7 @@ class CseEdit {
 	}
 }
 
-class Guindaille {
-	constructor() {
-		this.video = document.getElementById("guindaille-video")
-	}
-
+class Video {
 	enable() {
 		this.video.currentTime = 0
 		this.video.play()
@@ -385,6 +381,22 @@ class Guindaille {
 	}
 }
 
+class Guindaille extends Video {
+	constructor() {
+		super()
+		this.video = document.getElementById("guindaille-video")
+	}
+}
+
+// TODO make custom visual for this?
+
+class Sacha extends Video {
+	constructor() {
+		super()
+		this.video = document.getElementById("sacha-video")
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -392,6 +404,7 @@ const OVERLAYS = {
 	"cse-edit": "cse-edit-warning",
 	"bsod": "bsod",
 	"guindaille": "guindaille",
+	"sacha": "sacha",
 }
 
 class BigScreen {
@@ -428,6 +441,7 @@ class BigScreen {
 			"cse": new Cse(),
 			"cse-edit": new CseEdit(),
 			"guindaille": new Guindaille(),
+			"sacha": new Sacha(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -472,6 +486,7 @@ class BigScreen {
 		else if (key === "c") this.state = "cse"
 		else if (key === "b") this.state = "bsod"
 		else if (key === "g") this.state = "guindaille"
+		else if (key === "s") this.state = "sacha"
 		else this.state = "dvd"
 
 		// enable new state

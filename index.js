@@ -352,6 +352,7 @@ class Dvd {
 const OVERLAYS = {
 	"cse": "cse-warning",
 	"cse-edit": "cse-edit-warning",
+	"bsod": "bsod",
 }
 
 class BigScreen {
@@ -432,6 +433,10 @@ class BigScreen {
 			const warning_input = document.getElementById("cse-warning-input")
 
 			warning_text.innerText = warning_input.value
+		}
+
+		else if (key === "b") {
+			this.state = "bsod"
 		}
 
 		else {

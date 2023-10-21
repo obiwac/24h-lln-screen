@@ -29,6 +29,11 @@
 				color: red;
 			}
 
+			.bsod {
+				background: url("res/bsod.png");
+				background-size: cover;
+			}
+
 			/* XXX yeah a little hacky ig */
 
 			div[hidden] {
@@ -121,6 +126,9 @@
 			<h3>Modifier l'avertissement du CSE</h3>
 			<input type="text" id="cse-warning-input" value="Ceci est un message de test"></input>
 			<button onclick="big_screen.change_state('c')">Afficher le message</button>
+		</div>
+
+		<div class="overlay bsod" id="bsod" hidden>
 		</div>
 	</body>
 </html>

@@ -295,7 +295,7 @@ class Dvd {
 		return false
 	}
 
-	render(dt, time) {
+	render(dt, _time) {
 		const dist = 15
 		const frustum_slope = Math.tan(this.fov / 2)
 
@@ -356,6 +356,7 @@ class Dvd {
 const OVERLAYS = {
 	"cse": "cse-warning",
 	"cse-edit": "cse-edit-warning",
+	"bsod": "bsod",
 }
 
 class BigScreen {
@@ -438,6 +439,10 @@ class BigScreen {
 			warning_text.innerText = warning_input.value
 		}
 
+		else if (key === "b") {
+			this.state = "bsod"
+		}
+
 		else {
 			this.state = "dvd"
 		}
@@ -454,6 +459,11 @@ class BigScreen {
 		const dt = (now - this.prev) / 1000
 		this.prev = now
 
+		if (dt > 1 / 10) { // skip frame if slower than 10 FPS
+			requestAnimationFrame(now => this.render(now))
+			return
+		}
+
 		const time = now / 1000
 
 		let colour = [0, 0, 0]
@@ -469,7 +479,7 @@ class BigScreen {
 			this.renderers[this.state].render(dt, time)
 		}
 
-		requestAnimationFrame((now) => this.render(now))
+		requestAnimationFrame(now => this.render(now))
 	}
 }
 

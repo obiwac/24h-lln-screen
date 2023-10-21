@@ -34,6 +34,11 @@
 				background-size: cover;
 			}
 
+			video {
+				width: 100%;
+				height: 100%;
+			}
+
 			/* XXX yeah a little hacky ig */
 
 			div[hidden] {
@@ -116,6 +121,12 @@
 	<body>
 		<!-- TODO confirm resolution -->
 		<canvas id="canvas" class="overlay" width="960" height="576"></canvas>
+
+		<div class="overlay" id="guindaille" hidden>
+			<video id="guindaille-video">
+				<source src="res/guindaille.mp4" type="video/mp4">
+			</video>
+		</div>
 
 		<div class="overlay cse-warning" id="cse-warning" hidden>
 			<h3>Avertissement du CSE</h3>

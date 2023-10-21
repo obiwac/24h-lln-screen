@@ -252,8 +252,8 @@ class Shader {
 
 		if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) {
 			const log = this.gl.getProgramInfoLog(this.program)
-			let vert_compilation_log = this.gl.getShaderInfoLog(vert_shader);
-			let frag_compilation_log = this.gl.getShaderInfoLog(frag_shader);
+			let vert_compilation_log = this.gl.getShaderInfoLog(vert_shader)
+			let frag_compilation_log = this.gl.getShaderInfoLog(frag_shader)
 
 			console.error(vert_compilation_log)
 			console.error(frag_compilation_log)
@@ -351,12 +351,47 @@ class Dvd {
 	}
 }
 
+class Cse {
+	constructor() {
+		this.warning_text = document.getElementById("cse-warning-text")
+		this.warning_input = document.getElementById("cse-warning-input")
+	}
+
+	enable() {
+		this.warning_text.innerText = this.warning_input.value
+	}
+}
+
+class CseEdit {
+	keypress(_key) {
+		// always ignore key presses if modifying CSE warning message
+
+		return true
+	}
+}
+
+class Guindaille {
+	constructor() {
+		this.video = document.getElementById("guindaille-video")
+	}
+
+	enable() {
+		this.video.currentTime = 0
+		this.video.play()
+	}
+
+	disable() {
+		this.video.pause()
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
 	"cse": "cse-warning",
 	"cse-edit": "cse-edit-warning",
 	"bsod": "bsod",
+	"guindaille": "guindaille",
 }
 
 class BigScreen {
@@ -388,22 +423,19 @@ class BigScreen {
 
 		this.state = "dvd"
 
-		this.renderers = {
-			"dvd": new Dvd(this.gl)
+		this.states = {
+			"dvd": new Dvd(this.gl),
+			"cse": new Cse(),
+			"cse-edit": new CseEdit(),
+			"guindaille": new Guindaille(),
 		}
 
 		window.addEventListener("keypress", e => {
-			// don't process key presses if modifying CSE warning message
-
-			if (this.state === "cse-edit") {
-				return
-			}
-
 			// make sure the current state doesn't handle this key
 
-			const renderer = this.renderers[this.state]
+			const state = this.states[this.state]
 
-			if (renderer && renderer.keypress && renderer.keypress(e.key)) {
+			if (state && state.keypress && state.keypress(e.key)) {
 				return
 			}
 
@@ -424,27 +456,32 @@ class BigScreen {
 			overlay.hidden = true
 		}
 
+		// disable previous state
+
+		{
+			const state = this.states[this.state]
+
+			if (state && state.disable) {
+				state.disable()
+			}
+		}
+
 		// set new state
 
-		if (key === "e") {
-			this.state = "cse-edit"
-		}
+		if (key === "e") this.state = "cse-edit"
+		else if (key === "c") this.state = "cse"
+		else if (key === "b") this.state = "bsod"
+		else if (key === "g") this.state = "guindaille"
+		else this.state = "dvd"
 
-		else if (key === "c") {
-			this.state = "cse"
+		// enable new state
 
-			const warning_text = document.getElementById("cse-warning-text")
-			const warning_input = document.getElementById("cse-warning-input")
+		{
+			const state = this.states[this.state]
 
-			warning_text.innerText = warning_input.value
-		}
-
-		else if (key === "b") {
-			this.state = "bsod"
-		}
-
-		else {
-			this.state = "dvd"
+			if (state && state.enable) {
+				state.enable()
+			}
 		}
 
 		// enable overlay of new state
@@ -475,8 +512,10 @@ class BigScreen {
 		this.gl.clearColor(...colour, 1)
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-		if (this.renderers[this.state]) {
-			this.renderers[this.state].render(dt, time)
+		const state = this.states[this.state]
+
+		if (state && state.render) {
+			state.render(dt, time)
 		}
 
 		requestAnimationFrame(now => this.render(now))

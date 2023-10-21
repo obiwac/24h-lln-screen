@@ -397,6 +397,13 @@ class Sacha extends Video {
 	}
 }
 
+class Infeau extends Video {
+	constructor() {
+		super()
+		this.video = document.getElementById("infeau-video")
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -405,6 +412,7 @@ const OVERLAYS = {
 	"bsod": "bsod",
 	"guindaille": "guindaille",
 	"sacha": "sacha",
+	"infeau": "infeau",
 }
 
 class BigScreen {
@@ -442,6 +450,7 @@ class BigScreen {
 			"cse-edit": new CseEdit(),
 			"guindaille": new Guindaille(),
 			"sacha": new Sacha(),
+			"infeau": new Infeau(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -487,6 +496,7 @@ class BigScreen {
 		else if (key === "b") this.state = "bsod"
 		else if (key === "g") this.state = "guindaille"
 		else if (key === "s") this.state = "sacha"
+		else if (key === "i") this.state = "infeau"
 		else this.state = "dvd"
 
 		// enable new state

@@ -541,6 +541,9 @@ class Radio {
 
 		this.banner_pos = [14, 0, -0.01]
 		this.target_banner_pos = structuredClone(this.banner_pos)
+
+		this.marquee_height = -6.5
+		this.target_marquee_height = this.marquee_height
 	}
 
 	enable() {
@@ -551,6 +554,7 @@ class Radio {
 
 		this.logo_pos = [-12.2, 15, -7]
 		this.banner_pos = [14, 30, -0.01]
+		this.marquee_height = -9
 	}
 
 	render(dt, time) {
@@ -623,18 +627,19 @@ class Radio {
 		// render marquee
 
 		{
+			this.marquee_height = anim(this.marquee_height, this.target_marquee_height, dt * 3)
 			const width = 7 * 4.8
 			const speed = 3
 
 			let model_mat = new Matrix(identity)
-			model_mat.translate((time * speed) % width, -6.5, 5)
+			model_mat.translate((time * speed) % width, this.marquee_height, 5)
 			model_mat.scale(width, 7 * 1, 1)
 
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 			this.marquee.draw(this.gl)
 
 			model_mat = new Matrix(identity)
-			model_mat.translate((time * speed) % width - width, -6.5, 5)
+			model_mat.translate((time * speed) % width - width, this.marquee_height, 5)
 			model_mat.scale(7 * 4.8, 7 * 1, 1)
 
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())

@@ -116,6 +116,11 @@ var alpha = 1
 const TAU = Math.PI * 2
 const FLOAT32_SIZE = 4
 
+const point_light_position = [1.0, 1.0, 0.0]
+const point_light_color = [1.0, 1.0, 1.0]
+const point_light_intensity = 10;
+
+
 class Texture {
 	constructor(gl, img_path) {
 		this.gl = gl
@@ -298,6 +303,10 @@ class Dvd {
 		this.model_uniform = this.shader.uniform("u_model")
 		this.vp_uniform = this.shader.uniform("u_vp")
 
+		this.point_light_position_uniform = this.shader.uniform("u_pl_pos")
+		this.point_light_color_uniform = this.shader.uniform("u_pl_color")
+		this.point_light_intensity_uniform = this.shader.uniform("u_pl_intensity")
+
 		this.fov = TAU / 4
 		this.model = new Model(this.gl, kap_model)
 
@@ -309,14 +318,27 @@ class Dvd {
 
 	keypress(key) {
 		if (key === "f") {
-			// TODO cheat and target a corner
-			// only do this on next bounce so it doesn't look too obvious the direction has changed
-			// target the corner closest to where the next intersection is gonna be (simple atan2)
-
+			this.cheat = true;
 			return true
 		}
 
 		return false
+	}
+
+	get_angle_from_corner(x, y, a, b) {
+
+	}
+
+	get_corner_from_pos(x, y, model) { // maybe check the side ?
+		if(x >= 0.5 && y >= 0.5) { // -1, -1
+
+		} else if (x >= 0.5 && y <= 0.5) { // -1, 1
+
+		} else if (x <= 0.5 && y >= 0.5) { // 1, -1
+
+		} else if (x <= 0.5 && y <= 0.5) { // 1, 1
+
+		}
 	}
 
 	render(dt, _time) {
@@ -339,7 +361,16 @@ class Dvd {
 			this.y > 1 - this.model.max_y / frustum_slope / dist ||
 			this.y < -1 - this.model.min_y / frustum_slope / dist
 		) {
+
+			if(this.x > 1 - this.model.max_x / frustum_slope / dist ||
+			this.x < -1 - this.model.min_x / frustum_slope / dist) {
+				console.log("Corner !")
+			}
+
 			this.theta = -this.theta
+			if (this.cheat) {
+				this.get_corner_from_pos(this.x, this.y)
+			}
 		}
 
 		if (
@@ -370,6 +401,9 @@ class Dvd {
 
 		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
 		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())
+		this.gl.uniform3f(this.point_light_position_uniform, ...point_light_position)
+		this.gl.uniform3f(this.point_light_color_uniform, ...point_light_color)
+		this.gl.uniform1f(this.point_light_intensity_uniform, point_light_intensity)
 
 		this.model.draw(this.gl)
 	}
@@ -409,6 +443,7 @@ class Radio {
 
 		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
 		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())
+
 
 		this.texture.use(this.texture_uniform)
 		this.model.draw(this.gl)
@@ -468,6 +503,13 @@ class Infeau extends Video {
 	}
 }
 
+class Decompte extends Video {
+	constructor(){
+		super()
+		this.video = document.getElementById("decompte-video")
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -477,6 +519,7 @@ const OVERLAYS = {
 	"guindaille": "guindaille",
 	"sacha": "sacha",
 	"infeau": "infeau",
+	"decompte": "decompte",
 }
 
 class BigScreen {
@@ -516,6 +559,7 @@ class BigScreen {
 			"sacha": new Sacha(),
 			"infeau": new Infeau(),
 			"radio": new Radio(this.gl),
+			"decompte": new Decompte(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -563,6 +607,7 @@ class BigScreen {
 		else if (key === "s") this.state = "sacha"
 		else if (key === "i") this.state = "infeau"
 		else if (key === "r") this.state = "radio"
+		else if (key === "d") this.state = "decompte"
 		else this.state = "dvd"
 
 		// enable new state

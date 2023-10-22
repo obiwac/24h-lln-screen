@@ -339,8 +339,10 @@ class Dvd {
 		const vx = Math.cos(this.theta)
 		const vy = Math.sin(this.theta)
 
-		this.x += vx * dt * 0.3
-		this.y += vy * dt * 0.3
+		this.x += vx * dt * 0.7
+		this.y += vy * dt * 0.7
+
+		const ar = this.big_screen.aspect_ratio
 
 		if (
 			this.y > 1 - scale * this.model.max_y / frustum_slope / dist ||
@@ -350,8 +352,8 @@ class Dvd {
 		}
 
 		if (
-			this.x > 1 - scale * this.model.max_x / frustum_slope / dist ||
-			this.x < -1 - scale * this.model.min_x / frustum_slope / dist
+			this.x > ar - scale * this.model.max_x / frustum_slope / dist ||
+			this.x < -ar - scale * this.model.min_x / frustum_slope / dist
 		) {
 			this.theta = TAU / 2 - this.theta
 		}

@@ -542,7 +542,7 @@ class Textile {
 		{
 			const model_mat = new Matrix(identity)
 			model_mat.scale(10, 10, 1)
-			model_mat.translate(...this.star_pos)
+			model_mat.translate(...placement,0)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 			this.star.draw(this.gl)
 		}

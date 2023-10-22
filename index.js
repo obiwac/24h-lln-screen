@@ -116,10 +116,27 @@ var alpha = 1
 const TAU = Math.PI * 2
 const FLOAT32_SIZE = 4
 
+var mx, my
+var placement
+
+window.addEventListener("mousemove", (e) => {
+	mx = e.pageX
+	my = e.pageY
+
+	placement = [mx / 30 - 30, -my / 30 + 20]
+}, false)
+
+window.addEventListener("mousedown", () => {
+	console.log(placement)
+}, false)
+
 const point_light_position = [1.0, 1.0, 0.0]
 const point_light_color = [1.0, 1.0, 1.0]
 const point_light_intensity = 10
+<<<<<<< HEAD
 
+=======
+>>>>>>> e135994f86a889a8bcb128639452484b484fc85b
 
 class Texture {
 	constructor(gl, img_path) {
@@ -488,7 +505,7 @@ class Radio {
 
 	render(_dt, time) {
 		const proj_matrix = new Matrix()
-		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 20)
+		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
 
 		const view_matrix = new Matrix()
 		view_matrix.translate(0, 0, -15)
@@ -503,7 +520,7 @@ class Radio {
 
 		{
 			const model_mat = new Matrix(identity)
-			model_mat.translate(0, -3, 0)
+			model_mat.translate(-8.2, -8.4, 0)
 			model_mat.scale(50, 50, 50)
 			model_mat.rotate_2d(time, 0)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
@@ -516,8 +533,8 @@ class Radio {
 
 		{
 			const model_mat = new Matrix(identity)
-			model_mat.translate(0, 0, -1)
-			model_mat.scale(20, 15, 10)
+			model_mat.translate(-12.2, 8.1, -5)
+			model_mat.scale(40, 25, 10)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 
 			this.logo.draw(this.gl)

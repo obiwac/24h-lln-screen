@@ -153,10 +153,6 @@ function anim_vec(x, target, multiplier) {
 const point_light_position = [1.0, 1.0, 0.0]
 const point_light_color = [1.0, 1.0, 1.0]
 const point_light_intensity = 10
-<<<<<<< HEAD
-
-=======
->>>>>>> e135994f86a889a8bcb128639452484b484fc85b
 
 class Texture {
 	constructor(gl, img_path) {

@@ -130,6 +130,26 @@ window.addEventListener("mousedown", () => {
 	console.log(placement)
 }, false)
 
+function anim(x, target, multiplier) {
+	if (multiplier > 1) {
+		return target
+	}
+
+	else {
+		return x + (target - x) * multiplier
+	}
+}
+
+function anim_vec(x, target, multiplier) {
+	let vec = structuredClone(x)
+
+	for (let i = 0; i < x.length; i++) {
+		vec[i] = anim(x[i], target[i], multiplier)
+	}
+
+	return vec
+}
+
 const point_light_position = [1.0, 1.0, 0.0]
 const point_light_color = [1.0, 1.0, 1.0]
 const point_light_intensity = 10
@@ -477,9 +497,27 @@ class Radio {
 		this.texture = new Texture(this.gl, "res/radio.png")
 
 		this.logo = new Surf(big_screen, "res/radio-logo.png")
+
+		this.pos = [-8.2, -9.4, 0]
+		this.target_pos = structuredClone(this.pos)
+
+		this.rot = [0, 0]
+		this.target_rot = structuredClone(this.rot)
+
+		this.logo_pos = [-12.2, 8.1, -5]
+		this.target_logo_pos = structuredClone(this.logo_pos)
 	}
 
-	render(_dt, time) {
+	enable() {
+		this.pos = [0, 0, 15]
+
+		this.rot = [0, TAU / 8]
+		this.target_rot = [0, 0]
+
+		this.logo_pos = [-12.2, 15, -7]
+	}
+
+	render(dt, _time) {
 		const proj_matrix = new Matrix()
 		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
 
@@ -495,10 +533,15 @@ class Radio {
 		// render radio
 
 		{
+			this.pos = anim_vec(this.pos, this.target_pos, dt * 3)
+			this.rot = anim_vec(this.rot, this.target_rot, dt * 3)
+
+			this.target_rot[0] += dt
+
 			const model_mat = new Matrix(identity)
-			model_mat.translate(-8.2, -8.4, 0)
+			model_mat.translate(...this.pos)
 			model_mat.scale(50, 50, 50)
-			model_mat.rotate_2d(time, 0)
+			model_mat.rotate_2d(...this.rot)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 
 			this.texture.use(this.big_screen.fullbright_texture_uniform)
@@ -508,8 +551,10 @@ class Radio {
 		// render logo
 
 		{
+			this.logo_pos = anim_vec(this.logo_pos, this.target_logo_pos, dt * 3)
+
 			const model_mat = new Matrix(identity)
-			model_mat.translate(-12.2, 8.1, -5)
+			model_mat.translate(...this.logo_pos)
 			model_mat.scale(40, 25, 10)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 

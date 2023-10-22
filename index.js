@@ -1015,9 +1015,21 @@ class Kotyvideo extends Video {
 	}
 }
 
+class Organevideo extends Video {
+	constructor(){
+		super("organe-video")
+	}
+}
+
 class Photovideo extends Video {
 	constructor(){
 		super("photo-video")
+	}
+}
+
+class Certyvideo extends Video {
+	constructor(){
+		super("certyno-video")
 	}
 }
 
@@ -1035,6 +1047,11 @@ const OVERLAYS = {
 	"112": "112",
 	"kapvert": "kapvert",
 	"photo": "photo",
+	"organe": "organe",
+	"certyno": "certyno",
+	"verdom": "verdom",
+	"manga": "manga",
+	"fairkot": "fairkot",
 }
 
 class BigScreen {
@@ -1094,6 +1111,8 @@ class BigScreen {
 			"koty": new Kotyvideo(),
 			"photo": new Photovideo(),
 			"auk": new Auk(this),
+			"organe": new Organevideo(),
+			"certyno": new Certyvideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1150,6 +1169,11 @@ class BigScreen {
 		else if (key === "l") this.state = "salad"
 		else if (key === "p") this.state = "photo"
 		else if (key === "a") this.state = "auk"
+		else if (key === "2") this.state = "organe"
+		else if (key === "y") this.state = "certyno"
+		else if (key === "m") this.state = "manga"
+		else if (key === "3") this.state = "verdom"
+		else if (key === "f") this.state = "fairkot"
 		else this.state = "dvd"
 
 		// enable new state

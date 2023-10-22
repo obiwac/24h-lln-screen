@@ -11,6 +11,7 @@
 
 		<script src="models/kap.js"></script>
 		<script src="models/radio.js"></script>
+		<script src="models/guitar.js"></script>
 
 		<style>
 			body {
@@ -141,7 +142,7 @@
 			out vec4 frag_colour;
 
 			void main(void) {
-				vec4 colour = texture(u_tex, tex_coord);
+				vec4 colour = texture(u_tex, tex_coord.yx);
 				frag_colour = colour;
 			}
 		</script>

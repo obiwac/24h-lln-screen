@@ -525,7 +525,7 @@ class Textile {
 
 	enable() {
 		this.pos = [0, 0, 0]
-		this.star_pos = [0, 0, 0]
+		this.star_pos = [15.5, -5.3, 1]
 	}
 
 	render(dt, time) {
@@ -541,15 +541,6 @@ class Textile {
 		this.big_screen.fullbright_shader.use()
 		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
 
-		// render star
-		{
-			const model_mat = new Matrix(identity)
-			model_mat.scale(10, 10, 1)
-			model_mat.translate(...placement,0)
-			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
-			this.star.draw(this.gl)
-		}
-
 		// render background
 		{
 			const model_mat = new Matrix(identity)
@@ -557,6 +548,15 @@ class Textile {
 			model_mat.translate(...this.pos)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 			this.background.draw(this.gl)
+		}
+		// render star
+		{
+			const model_mat = new Matrix(identity)
+			const scale = 13 + Math.sin(time * 2) * Math.sin(time * 2) * 2
+			model_mat.translate(...this.star_pos)
+			model_mat.scale(scale, scale, 1)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.star.draw(this.gl)
 		}
 	}
 }

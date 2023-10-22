@@ -150,7 +150,7 @@ function anim_vec(x, target, multiplier) {
 	return vec
 }
 
-const point_light_position = [1.0, 1.0, 0.0]
+const point_light_position = [10.0, 10.0, 10.0]
 const point_light_color = [1.0, 1.0, 1.0]
 const point_light_intensity = 10
 

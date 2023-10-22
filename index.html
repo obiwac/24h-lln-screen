@@ -103,17 +103,18 @@
 			void main(void) {
 				vec3 light_dir = normalize(u_pl_pos - world_pos.xyz);
 
-				float attenuation = max(dot(normalize(normal), light_dir), 0.0);
+				float attenuation = dot(normalize(normal), light_dir);
+				attenuation *= 0.6;
 				vec3 diffuse = attenuation * u_pl_color;
 
-				vec3 ambient = vec3(1.0, 0.0, 0.1);
+				vec3 albedo = vec3(1.0, 0.0, 1.0);
 				if (u_rainbow) {
-					ambient = vec3(abs(sin(u_time)), abs(cos(u_time)), abs(tan(u_time)));
+					albedo = vec3(abs(sin(u_time)), abs(cos(u_time)), abs(tan(u_time)));
 				}
 
-				ambient *= 0.5;
+				albedo *= 0.3;
 
-				frag_colour = vec4(ambient + diffuse, 1.0);
+				frag_colour = vec4(albedo + attenuation, 1.0);
 			}
 		</script>
 

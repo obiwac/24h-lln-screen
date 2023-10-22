@@ -514,6 +514,53 @@ class Dvd {
 	}
 }
 
+class Textile {
+	constructor(big_screen) {
+		this.big_screen = big_screen
+		this.gl = big_screen.gl
+
+		this.background = new Surf(big_screen, "res/textile-affiche.png")
+		this.star = new Surf(big_screen, "res/star.png")
+	}
+
+	enable() {
+		this.pos = [0, 0, 0]
+		this.star_pos = [15.5, -5.3, 1]
+	}
+
+	render(dt, time) {
+		const proj_matrix = new Matrix()
+		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
+
+		const view_matrix = new Matrix()
+		view_matrix.translate(0, 0, -15)
+
+		const vp_matrix = new Matrix(view_matrix)
+		vp_matrix.multiply(proj_matrix)
+
+		this.big_screen.fullbright_shader.use()
+		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
+
+		// render background
+		{
+			const model_mat = new Matrix(identity)
+			model_mat.scale(50, 30, 1) // 50 30
+			model_mat.translate(...this.pos)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.background.draw(this.gl)
+		}
+		// render star
+		{
+			const model_mat = new Matrix(identity)
+			const scale = 13 + Math.sin(time * 2) * Math.sin(time * 2) * 2
+			model_mat.translate(...this.star_pos)
+			model_mat.scale(scale, scale, 1)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.star.draw(this.gl)
+		}
+	}
+}
+
 class Radio {
 	constructor(big_screen) {
 		this.big_screen = big_screen
@@ -888,6 +935,7 @@ class BigScreen {
 			"infeau": new Infeau(),
 			"radio": new Radio(this),
 			"kapo": new Kapo(this),
+			"textile": new Textile(this),
 			"decompte": new Decompte(),
 			"koty": new Kotyvideo(),
 		}
@@ -941,6 +989,7 @@ class BigScreen {
 		else if (key === "k") this.state = "kapo"
 		else if (key === "o") this.state = "koty"
 		else if (key === "1") this.state = "112"
+		else if (key === "t") this.state = "textile"
 		else this.state = "dvd"
 
 		// enable new state

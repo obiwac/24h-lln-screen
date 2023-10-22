@@ -98,10 +98,10 @@ class Matrix {
 		this.rotate(-pitch, Math.cos(yaw), 0, Math.sin(yaw))
 	}
 
-	perspective(fov, near, far) {
+	perspective(fov, aspect_ratio, near, far) {
 		const scale = 1 / Math.tan(fov / 2)
 
-		this.data[0][0] = scale
+		this.data[0][0] = scale / aspect_ratio
 		this.data[1][1] = scale
 		this.data[2][2] = -far / (far - near)
 		this.data[3][2] = -far * near / (far - near)
@@ -297,6 +297,7 @@ class Shader {
 
 class Dvd {
 	constructor(big_screen) {
+		this.big_screen = big_screen
 		this.gl = big_screen.gl
 		this.shader = new Shader(this.gl, "kap")
 
@@ -358,7 +359,7 @@ class Dvd {
 		// matrix stuff
 
 		const proj_matrix = new Matrix()
-		proj_matrix.perspective(this.fov, 2, 20)
+		proj_matrix.perspective(this.fov, this.big_screen.aspect_ratio, 2, 20)
 
 		const view_matrix = new Matrix()
 		view_matrix.translate(0, 0, -dist)
@@ -394,7 +395,7 @@ class Radio {
 
 	render(_dt, time) {
 		const proj_matrix = new Matrix()
-		proj_matrix.perspective(TAU / 4, 2, 20)
+		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 20)
 
 		const view_matrix = new Matrix()
 		view_matrix.translate(0, 0, -15)
@@ -509,6 +510,7 @@ class BigScreen {
 
 		this.x_res = this.gl.drawingBufferWidth
 		this.y_res = this.gl.drawingBufferHeight
+		this.aspect_ratio = this.x_res / this.y_res
 
 		this.gl.viewport(0, 0, this.x_res, this.y_res)
 

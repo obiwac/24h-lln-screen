@@ -585,7 +585,7 @@ class BigScreen {
 			"guindaille": new Guindaille(),
 			"sacha": new Sacha(),
 			"infeau": new Infeau(),
-			"radio": new Radio(this.gl),
+			"radio": new Radio(this),
 			"decompte": new Decompte(),
 		}
 

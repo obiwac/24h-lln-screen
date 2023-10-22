@@ -810,16 +810,21 @@ class Salad {
 
 		this.model = new Model(this.gl, earth_model)
 		this.texture = new Texture(this.gl, "res/earth.jpg")
+		this.background = new Surf(big_screen, "res/salad.png")
 
-		this.pos = [0, 0, 0]
+		this.pos = [0, -3, 0]
 		this.target_pos = structuredClone(this.pos)
+
+		this.bg_pos = [0, 0, 0]
+		this.target_bg_pos = structuredClone(this.bg_pos)
 
 		this.rot = [0, 0]
 		this.target_rot = structuredClone(this.rot)
 	}
 
 	enable() {
-		this.pos = [0, 0, 7]
+		this.pos = [0, 0, 9]
+		this.bg_pos = [0, 0, 3]
 
 		this.rot = [0, TAU / 8]
 		this.target_rot = [0, 0]
@@ -838,6 +843,17 @@ class Salad {
 		this.big_screen.fullbright_shader.use()
 		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
 
+		// render background
+
+		{
+			this.bg_pos = anim_vec(this.bg_pos, this.target_bg_pos, dt * 3)
+			const model_mat = new Matrix(identity)
+			model_mat.scale(50, 30, 1) // 50 30
+			model_mat.translate(...this.bg_pos)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.background.draw(this.gl)
+		}
+
 		// render earth
 
 		{
@@ -848,7 +864,7 @@ class Salad {
 
 			const model_mat = new Matrix(identity)
 			model_mat.translate(...this.pos)
-			model_mat.scale(7, 7, 7)
+			model_mat.scale(5, 5, 5)
 			model_mat.rotate_2d(...this.rot)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 

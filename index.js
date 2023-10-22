@@ -719,13 +719,21 @@ class Kapo {
 
 			this.target_rot[0] += dt
 
-			const model_mat = new Matrix(identity)
+			let model_mat = new Matrix(identity)
 			model_mat.scale(5, 5, 5)
 			model_mat.translate(...this.pos)
 			model_mat.rotate_2d(...this.rot)
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 
 			this.texture.use(this.big_screen.fullbright_texture_uniform)
+			this.model.draw(this.gl)
+
+			model_mat = new Matrix(identity)
+			model_mat.scale(-5, 5, 5)
+			model_mat.translate(...this.pos)
+			model_mat.rotate_2d(...this.rot)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+
 			this.model.draw(this.gl)
 		}
 

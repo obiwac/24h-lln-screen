@@ -659,21 +659,26 @@ class Kapo {
 		this.model = new Model(this.gl, guitar_model)
 		this.texture = new Texture(this.gl, "res/guitar.jpg")
 
-		this.pos = [-3, -1.2, 0]
+		this.pos = [-3.3, -1.2, 0]
 		this.target_pos = structuredClone(this.pos)
 
 		this.rot = [0, 0]
 		this.target_rot = structuredClone(this.rot)
 
 		this.melt_shader = new Shader(this.gl, "melt")
-		this.melt = new Surf(this)
+		this.melt = new Surf(big_screen)
 
 		this.melt_u_time = this.melt_shader.uniform("iTime")
 		this.melt_u_res = this.melt_shader.uniform("iResolution")
+
+		this.logo = new Surf(big_screen, "res/lundis.png")
+		this.logo_pos = [0, 0, 0]
+		this.target_logo_pos = structuredClone(this.logo_pos)
 	}
 
 	enable() {
 		this.pos = [0, 0, 3]
+		this.logo_pos = [0, 0, 2]
 
 		this.rot = [0, TAU / 8]
 		this.target_rot = [0, 0]
@@ -695,7 +700,7 @@ class Kapo {
 
 		{
 			this.melt_shader.use()
-			this.gl.uniform1f(this.melt_u_time, time)
+			this.gl.uniform1f(this.melt_u_time, (time + 100) % 1000)
 			this.gl.uniform2f(this.melt_u_res, this.big_screen.x_res, this.big_screen.y_res)
 
 			this.melt.draw(this.gl)
@@ -722,6 +727,20 @@ class Kapo {
 
 			this.texture.use(this.big_screen.fullbright_texture_uniform)
 			this.model.draw(this.gl)
+		}
+
+		// render text
+
+		{
+			this.logo_pos = anim_vec(this.logo_pos, this.target_logo_pos, dt * 3)
+
+			const model_mat = new Matrix(identity)
+			model_mat.scale(25, 25, 25)
+			model_mat.translate(...this.logo_pos)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+
+			this.texture.use(this.big_screen.fullbright_texture_uniform)
+			this.logo.draw()
 		}
 	}
 }

@@ -524,6 +524,8 @@ class Radio {
 			new Surf(big_screen, "res/materiel.png"),
 		]
 
+		this.banner = new Surf(big_screen, "res/radio-white.png")
+
 		this.pos = [-8.2, -9.4, 0]
 		this.target_pos = structuredClone(this.pos)
 
@@ -590,6 +592,13 @@ class Radio {
 		// render activities
 
 		{
+			const model_mat = new Matrix(identity)
+			model_mat.translate(14, 0, -0.01)
+			model_mat.scale(16, 100, 15)
+
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.banner.draw(this.gl)
+
 			const offset = time / 5
 
 			for (let i = 0; i < 3; i++) {

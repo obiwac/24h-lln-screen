@@ -150,7 +150,7 @@ function anim_vec(x, target, multiplier) {
 	return vec
 }
 
-const point_light_position = [1.0, 1.0, 0.0]
+const point_light_position = [10.0, 10.0, 10.0]
 const point_light_color = [1.0, 1.0, 1.0]
 const point_light_intensity = 10
 
@@ -528,7 +528,7 @@ class Textile {
 		this.star_pos = [15.5, -5.3, 1]
 	}
 
-	render(dt, time) {
+	render(_dt, time) {
 		const proj_matrix = new Matrix()
 		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
 
@@ -542,6 +542,7 @@ class Textile {
 		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
 
 		// render background
+
 		{
 			const model_mat = new Matrix(identity)
 			model_mat.scale(50, 30, 1) // 50 30
@@ -549,7 +550,9 @@ class Textile {
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 			this.background.draw(this.gl)
 		}
+
 		// render star
+
 		{
 			const model_mat = new Matrix(identity)
 			const scale = 13 + Math.sin(time * 2) * Math.sin(time * 2) * 2
@@ -822,7 +825,7 @@ class Salad {
 		this.target_rot = [0, 0]
 	}
 
-	render(dt, time) {
+	render(dt, _time) {
 		const proj_matrix = new Matrix()
 		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
 
@@ -925,6 +928,12 @@ class Kotyvideo extends Video {
 	}
 }
 
+class Photovideo extends Video {
+	constructor(){
+		super("photo-video")
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -937,6 +946,8 @@ const OVERLAYS = {
 	"decompte": "decompte",
 	"koty":	"koty",
 	"112": "112",
+	"kapvert": "kapvert",
+	"photo": "photo",
 }
 
 class BigScreen {
@@ -994,6 +1005,7 @@ class BigScreen {
 			"salad": new Salad(this),
 			"decompte": new Decompte(),
 			"koty": new Kotyvideo(),
+			"photo": new Photovideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1045,8 +1057,10 @@ class BigScreen {
 		else if (key === "k") this.state = "kapo"
 		else if (key === "o") this.state = "koty"
 		else if (key === "1") this.state = "112"
+		else if (key === "v") this.state = "kapvert"
 		else if (key === "t") this.state = "textile"
 		else if (key === "l") this.state = "salad"
+		else if (key === "p") this.state = "photo"
 		else this.state = "dvd"
 
 		// enable new state

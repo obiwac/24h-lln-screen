@@ -41,8 +41,13 @@
 			}
 
 			.ambulance {
-				background: url("res/kot-112.jpg");
-				background-size: cover;
+				background: url("res/kot-112.jpg") no-repeat center center fixed;
+				background-size: 100% 100%;
+			}
+
+			.aubergine {
+				background: url("res/kap-vert.png") no-repeat center center fixed;
+				background-size: 100% 100%;
 			}
 
 			video {
@@ -104,17 +109,18 @@
 			void main(void) {
 				vec3 light_dir = normalize(u_pl_pos - world_pos.xyz);
 
-				float attenuation = max(dot(normalize(normal), light_dir), 0.0);
+				float attenuation = dot(normalize(normal), light_dir);
+				attenuation *= 0.6;
 				vec3 diffuse = attenuation * u_pl_color;
 
-				vec3 ambient = vec3(1.0, 0.0, 0.1);
+				vec3 albedo = vec3(1.0, 0.0, 1.0);
 				if (u_rainbow) {
-					ambient = vec3(abs(sin(u_time)), abs(cos(u_time)), abs(tan(u_time)));
+					albedo = vec3(abs(sin(u_time)), abs(cos(u_time)), abs(tan(u_time)));
 				}
 
-				ambient *= 0.5;
+				albedo *= 0.3;
 
-				frag_colour = vec4(ambient + diffuse, 1.0);
+				frag_colour = vec4(albedo + attenuation, 1.0);
 			}
 		</script>
 
@@ -246,8 +252,13 @@
 			</video>
 		</div>
 
-		<div class="overlay ambulance" id="112" hidden>
+		<div class="overlay" id="photo" hidden>
+			<video id="photo-video">
+				<source src="res/photokot.mp4" type="video/mp4">
+			</video>
 		</div>
+		<div class="overlay ambulance" id="112" hidden></div>
+		<div class="overlay aubergine" id="kapvert" hidden></div>
 
 		<div class="overlay cse-warning" id="cse-warning" hidden>
 			<h3>Avertissement du CSE</h3>

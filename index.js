@@ -525,8 +525,9 @@ class Radio {
 		]
 
 		this.banner = new Surf(big_screen, "res/radio-white.png")
+		this.marquee = new Surf(big_screen, "res/radio-marquee.png")
 
-		this.pos = [-8.2, -9.4, 0]
+		this.pos = [-8.2, -9.4, -0.53]
 		this.target_pos = structuredClone(this.pos)
 
 		this.rot = [0, 0]
@@ -609,6 +610,27 @@ class Radio {
 				this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 				this.activities[i].draw(this.gl)
 			}
+		}
+
+		// render marquee
+
+		{
+			const width = 7 * 4.8
+			const speed = 3
+
+			let model_mat = new Matrix(identity)
+			model_mat.translate((time * speed) % width, -6.5, 5)
+			model_mat.scale(width, 7 * 1, 1)
+
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.marquee.draw(this.gl)
+
+			model_mat = new Matrix(identity)
+			model_mat.translate((time * speed) % width - width, -6.5, 5)
+			model_mat.scale(7 * 4.8, 7 * 1, 1)
+
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.marquee.draw(this.gl)
 		}
 	}
 }

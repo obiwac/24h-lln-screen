@@ -324,6 +324,7 @@ class Dvd {
 
 	keypress(key) {
 		if (key === "f") {
+
 			this.cheat = true;
 			return true
 		}
@@ -332,18 +333,29 @@ class Dvd {
 	}
 
 	get_angle_from_corner(x, y, a, b) {
+		const target_x  = a
+		const target_y = b
 
+		const dx = target_x - x
+		const dy = target_y - y
+
+		return Math.atan2(dy,dx)
 	}
 
-	get_corner_from_pos(x, y, model) { // maybe check the side ?
-		if(x >= 0.5 && y >= 0.5) { // -1, -1
+	get_corner_from_pos(x, y, ar) { // maybe check the side ?
+		if(x >= 0 && y >= 0) { // -1, -1
+			console.log("fff")
+			return this.get_angle_from_corner(x, y, -1, -1)
 
-		} else if (x >= 0.5 && y <= 0.5) { // -1, 1
-
-		} else if (x <= 0.5 && y >= 0.5) { // 1, -1
-
-		} else if (x <= 0.5 && y <= 0.5) { // 1, 1
-
+		} else if (x >= 0 && y <= 0) { // -1, 1
+			console.log("hmmm")
+			return this.get_angle_from_corner(x, y, -1, 1)
+		} else if (x <= 0 && y >= 0) { // 1, -1
+			console.log("la")
+			return this.get_angle_from_corner(x, y, 1, -1)
+		} else if (x <= 0 && y <= 0) { // 1, 1
+			console.log("ici")
+			return this.get_angle_from_corner(x, y,1.411239925376446, 0.7680795538927401)
 		}
 	}
 
@@ -370,15 +382,19 @@ class Dvd {
 			this.y > 1 - scale * this.model.max_y / frustum_slope / dist ||
 			this.y < -1 - scale * this.model.min_y / frustum_slope / dist
 		) {
+			console.log("hit at: ", this.x, this.y)
 
-			if(this.x > 1 - this.model.max_x / frustum_slope / dist ||
-			this.x < -1 - this.model.min_x / frustum_slope / dist) {
-				console.log("Corner !")
+			if (
+				this.x > ar - scale * this.model.max_x / frustum_slope / dist ||
+				this.x < -ar - scale * this.model.min_x / frustum_slope / dist
+			) {
+				console.log("Corner")
 			}
 
 			this.theta = -this.theta
 			if (this.cheat) {
-				this.get_corner_from_pos(this.x, this.y)
+				this.theta = this.get_corner_from_pos(this.x, this.y, ar)
+				this.cheat = false
 			}
 		}
 
@@ -386,7 +402,12 @@ class Dvd {
 			this.x > ar - scale * this.model.max_x / frustum_slope / dist ||
 			this.x < -ar - scale * this.model.min_x / frustum_slope / dist
 		) {
+			console.log("hit at: ", this.x, this.y)
 			this.theta = TAU / 2 - this.theta
+			if (this.cheat) {
+				this.theta = this.get_corner_from_pos(this.x, this.y, ar)
+				this.cheat = false
+			}
 		}
 
 		// matrix stuff
@@ -407,6 +428,7 @@ class Dvd {
 		// actual rendering
 
 		this.shader.use()
+
 
 		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
 		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())

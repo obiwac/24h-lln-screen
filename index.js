@@ -870,6 +870,12 @@ class Kotyvideo extends Video {
 	}
 }
 
+class Photovideo extends Video {
+	constructor(){
+		super("photo-video")
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -883,6 +889,7 @@ const OVERLAYS = {
 	"koty":	"koty",
 	"112": "112",
 	"kapvert": "kapvert",
+	"photo": "photo",
 }
 
 class BigScreen {
@@ -939,6 +946,7 @@ class BigScreen {
 			"textile": new Textile(this),
 			"decompte": new Decompte(),
 			"koty": new Kotyvideo(),
+			"photo": new Photovideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -992,6 +1000,7 @@ class BigScreen {
 		else if (key === "1") this.state = "112"
 		else if (key === "v") this.state = "kapvert"
 		else if (key === "t") this.state = "textile"
+		else if (key === "p") this.state = "photo"
 		else this.state = "dvd"
 
 		// enable new state

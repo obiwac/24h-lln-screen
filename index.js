@@ -118,7 +118,7 @@ const FLOAT32_SIZE = 4
 
 const point_light_position = [1.0, 1.0, 0.0]
 const point_light_color = [1.0, 1.0, 1.0]
-const point_light_intensity = 10;
+const point_light_intensity = 10
 
 
 class Texture {
@@ -316,9 +316,12 @@ class Dvd {
 		this.time_uniform = this.shader.uniform("u_time")
 
 		this.rainbow_uniform = this.shader.uniform("u_rainbow")
-		this.rainbow = false;
+		this.rainbow = false
 		this.rainbow_duration = 5
 		this.rainbow_timer = 0
+
+		this.rotation_duration = 1
+		this.rotation_timer = this.rotation_duration
 
 		this.fov = TAU / 4
 		this.model = new Model(this.gl, kap_model)
@@ -331,8 +334,7 @@ class Dvd {
 
 	keypress(key) {
 		if (key === "f") {
-
-			this.cheat = true;
+			this.cheat = true
 			return true
 		}
 
@@ -340,43 +342,54 @@ class Dvd {
 	}
 
 	get_angle_from_corner(x, y, a, b) {
-		const target_x  = a
+		const target_x = a
 		const target_y = b
 
 		const dx = target_x - x
 		const dy = target_y - y
 
-		return Math.atan2(dy,dx)
+		return Math.atan2(dy, dx)
 	}
 
-	get_corner_from_pos(x, y) { // maybe check the side ?
-		if(x >= 0 && y >= 0) { // -1, -1
-			console.log("fff")
-			return this.get_angle_from_corner(x, y, -1, -1)
+	get_corner_from_pos(x, y, model) { // maybe check the side ?
+		const model_width = (model.max_x - model.min_x)/15
+		const model_height = (model.max_y - model.min_y)/15
 
-		} else if (x >= 0 && y <= 0) { // -1, 1
-			console.log("hmmm")
-			return this.get_angle_from_corner(x, y, -1, 1)
-		} else if (x <= 0 && y >= 0) { // 1, -1
-			console.log("la")
-			return this.get_angle_from_corner(x, y, 1, -1)
-		} else if (x <= 0 && y <= 0) { // 1, 1
-			console.log("ici")
-			return this.get_angle_from_corner(x, y,1.411239925376446, 0.7680795538927401)
+		console.log(model_width, model_height)
+
+		if(x >= 0 && y >= 0) {
+			const new_x = x - (model_width/2)
+			const new_y = y - (model_height/2)
+
+			return this.get_angle_from_corner(new_x, new_y, -1, -1)
+		} else if (x >= 0 && y <= 0) {
+			const new_x = x - (model_width/2)
+			const new_y = y + (model_height/2)
+
+			return this.get_angle_from_corner(new_x, new_y, -1, 1)
+		} else if (x <= 0 && y >= 0) {
+			const new_x = x + (model_width/2)
+			const new_y = y - (model_height/2)
+
+			return this.get_angle_from_corner(new_x, new_y, 1, -1)
+		} else if (x <= 0 && y <= 0) {
+			const new_x = x + (model_width/2)
+			const new_y = y + (model_height/2)
+
+			return this.get_angle_from_corner(new_x, new_y,1.411239925376446, 0.7680795538927401)
 		}
+	}
+
+	lerp( a, b, alpha ) {
+		return a + alpha * (b-a)
 	}
 
 	render(dt, _time) {
 		const dist = 15
 		const scale = 2
 		const frustum_slope = Math.tan(this.fov / 2)
-		this.rainbow_timer -= dt;
-
-		// find where we should move the logo and handle bouncing off edges
-		// TODO lighting
-		// TODO changing colours
-		// TODO cool little rotation animation each time the logo hits an edge
-		// TODO cycle through colours of the rainbow when we hit corner
+		this.rainbow_timer -= dt
+		this.rotation_timer += dt
 
 		const vx = Math.cos(this.theta)
 		const vy = Math.sin(this.theta)
@@ -390,7 +403,9 @@ class Dvd {
 			this.y > 1 - scale * this.model.max_y / frustum_slope / dist ||
 			this.y < -1 - scale * this.model.min_y / frustum_slope / dist
 		) {
-			console.log("hit at: ", this.x, this.y)
+			if(this.rotation_timer >= this.rotation_duration) {
+				this.rotation_timer = 0.001
+			}
 
 			if (
 				this.x > ar - scale * this.model.max_x / frustum_slope / dist ||
@@ -402,7 +417,7 @@ class Dvd {
 
 			this.theta = -this.theta
 			if (this.cheat) {
-				this.theta = this.get_corner_from_pos(this.x, this.y, ar)
+				this.theta = this.get_corner_from_pos(this.x, this.y, this.model)
 				this.cheat = false
 			}
 		}
@@ -411,10 +426,12 @@ class Dvd {
 			this.x > ar - scale * this.model.max_x / frustum_slope / dist ||
 			this.x < -ar - scale * this.model.min_x / frustum_slope / dist
 		) {
-			console.log("hit at: ", this.x, this.y)
+			if(this.rotation_timer >= this.rotation_duration) {
+				this.rotation_timer = 0.001
+			}
 			this.theta = TAU / 2 - this.theta
 			if (this.cheat) {
-				this.theta = this.get_corner_from_pos(this.x, this.y, ar)
+				this.theta = this.get_corner_from_pos(this.x, this.y, this.model)
 				this.cheat = false
 			}
 		}
@@ -438,10 +455,13 @@ class Dvd {
 		model_matrix.translate(this.x * frustum_slope * dist, this.y * frustum_slope * dist, 0)
 		model_matrix.scale(scale, scale, scale / 2)
 
+		if(this.rotation_timer < this.rotation_duration) {
+			model_matrix.rotate_2d(this.lerp(0, TAU, this.rotation_timer/this.rotation_duration), 0)
+		}
+
 		// actual rendering
 
 		this.shader.use()
-
 
 		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
 		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())

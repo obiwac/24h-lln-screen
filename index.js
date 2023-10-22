@@ -313,6 +313,13 @@ class Dvd {
 		this.point_light_color_uniform = this.shader.uniform("u_pl_color")
 		this.point_light_intensity_uniform = this.shader.uniform("u_pl_intensity")
 
+		this.time_uniform = this.shader.uniform("u_time")
+
+		this.rainbow_uniform = this.shader.uniform("u_rainbow")
+		this.rainbow = false;
+		this.rainbow_duration = 5
+		this.rainbow_timer = 0
+
 		this.fov = TAU / 4
 		this.model = new Model(this.gl, kap_model)
 
@@ -342,7 +349,7 @@ class Dvd {
 		return Math.atan2(dy,dx)
 	}
 
-	get_corner_from_pos(x, y, ar) { // maybe check the side ?
+	get_corner_from_pos(x, y) { // maybe check the side ?
 		if(x >= 0 && y >= 0) { // -1, -1
 			console.log("fff")
 			return this.get_angle_from_corner(x, y, -1, -1)
@@ -363,6 +370,7 @@ class Dvd {
 		const dist = 15
 		const scale = 2
 		const frustum_slope = Math.tan(this.fov / 2)
+		this.rainbow_timer -= dt;
 
 		// find where we should move the logo and handle bouncing off edges
 		// TODO lighting
@@ -388,7 +396,8 @@ class Dvd {
 				this.x > ar - scale * this.model.max_x / frustum_slope / dist ||
 				this.x < -ar - scale * this.model.min_x / frustum_slope / dist
 			) {
-				console.log("Corner")
+				this.rainbow = 1
+				this.rainbow_timer = this.rainbow_duration
 			}
 
 			this.theta = -this.theta
@@ -408,6 +417,10 @@ class Dvd {
 				this.theta = this.get_corner_from_pos(this.x, this.y, ar)
 				this.cheat = false
 			}
+		}
+
+		if (this.rainbow_timer <= 0) {
+			this.rainbow = 0
 		}
 
 		// matrix stuff
@@ -435,6 +448,8 @@ class Dvd {
 		this.gl.uniform3f(this.point_light_position_uniform, ...point_light_position)
 		this.gl.uniform3f(this.point_light_color_uniform, ...point_light_color)
 		this.gl.uniform1f(this.point_light_intensity_uniform, point_light_intensity)
+		this.gl.uniform1f(this.time_uniform, _time)
+		this.gl.uniform1i(this.rainbow_uniform, this.rainbow)
 
 		this.model.draw(this.gl)
 	}

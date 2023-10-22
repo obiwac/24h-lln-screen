@@ -882,6 +882,7 @@ const OVERLAYS = {
 	"decompte": "decompte",
 	"koty":	"koty",
 	"112": "112",
+	"kapvert": "kapvert",
 }
 
 class BigScreen {
@@ -989,6 +990,7 @@ class BigScreen {
 		else if (key === "k") this.state = "kapo"
 		else if (key === "o") this.state = "koty"
 		else if (key === "1") this.state = "112"
+		else if (key === "v") this.state = "kapvert"
 		else if (key === "t") this.state = "textile"
 		else this.state = "dvd"
 

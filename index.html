@@ -40,8 +40,13 @@
 			}
 
 			.ambulance {
-				background: url("res/kot-112.jpg");
-				background-size: cover;
+				background: url("res/kot-112.jpg") no-repeat center center fixed;
+				background-size: 100% 100%;
+			}
+
+			.aubergine {
+				background: url("res/kap-vert.png") no-repeat center center fixed;
+				background-size: 100% 100%;
 			}
 
 			video {
@@ -246,8 +251,8 @@
 			</video>
 		</div>
 
-		<div class="overlay ambulance" id="112" hidden>
-		</div>
+		<div class="overlay ambulance" id="112" hidden></div>
+		<div class="overlay aubergine" id="kapvert" hidden></div>
 
 		<div class="overlay cse-warning" id="cse-warning" hidden>
 			<h3>Avertissement du CSE</h3>

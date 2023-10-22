@@ -147,46 +147,51 @@ class Texture {
 }
 
 class Surf {
-	constructor(gl, img_path) {
-		this.gl = gl
+	constructor(big_screen, img_path) {
+		this.big_screen = big_screen
+		this.gl = big_screen.gl
 
-		const verts = [ // x, y, u, v
-			-.5, -.5, 0, 0, // bottom left
-			-.5,  .5, 0, 1, // top left
-			 .5,  .5, 1, 1, // top right
-			 .5, -.5, 1, 0, // bottom right
+		const verts = [ // x, y, z, u, v, nx, ny, nz
+			-.5, -.5, 0, 0, 1, 0, 0, 0, // bottom left
+			-.5,  .5, 0, 0, 0, 0, 0, 0, // top left
+			 .5,  .5, 0, 1, 0, 0, 0, 0, // top right
+			 .5, -.5, 0, 1, 1, 0, 0, 0, // bottom right
 		]
 
 		this.indices = [0, 1, 2, 2, 3, 0]
 
 		// create quad mesh
 
-		this.vbo = gl.createBuffer()
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW)
+		this.vbo = this.gl.createBuffer()
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vbo)
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(verts), this.gl.STATIC_DRAW)
 
-		this.ibo = gl.createBuffer()
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(this.indices), gl.STATIC_DRAW)
+		this.ibo = this.gl.createBuffer()
+		this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+		this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(this.indices), this.gl.STATIC_DRAW)
 
 		// create texture
 
-		this.texture = Texture(gl, img_path)
+		this.texture = new Texture(this.gl, img_path)
 	}
 
-	draw(texture_uniform) {
-		this.texture.use(texture_uniform)
+	draw() {
+		// this.big_screen.fullbright_shader.use()
+		this.texture.use(this.big_screen.fullbright_uniform)
 
-		this.gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
-		this.gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vbo)
+		this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 
 		this.gl.enableVertexAttribArray(0)
-		this.gl.vertexAttribPointer(0, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 0)
+		this.gl.vertexAttribPointer(0, 3, this.gl.FLOAT, this.gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 0)
 
 		this.gl.enableVertexAttribArray(1)
-		this.gl.vertexAttribPointer(1, 2, gl.FLOAT, FLOAT32_SIZE * 4, FLOAT32_SIZE * 2)
+		this.gl.vertexAttribPointer(1, 2, this.gl.FLOAT, this.gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 3)
 
-		this.gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_BYTE, 0)
+		this.gl.enableVertexAttribArray(2)
+		this.gl.vertexAttribPointer(2, 3, this.gl.FLOAT, this.gl.FALSE, FLOAT32_SIZE * 8, FLOAT32_SIZE * 5)
+
+		this.gl.drawElements(this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_BYTE, 0)
 	}
 }
 
@@ -291,8 +296,8 @@ class Shader {
 }
 
 class Dvd {
-	constructor(gl) {
-		this.gl = gl
+	constructor(big_screen) {
+		this.gl = big_screen.gl
 		this.shader = new Shader(this.gl, "kap")
 
 		this.model_uniform = this.shader.uniform("u_model")
@@ -321,6 +326,7 @@ class Dvd {
 
 	render(dt, _time) {
 		const dist = 15
+		const scale = 2
 		const frustum_slope = Math.tan(this.fov / 2)
 
 		// find where we should move the logo and handle bouncing off edges
@@ -336,15 +342,15 @@ class Dvd {
 		this.y += vy * dt * 0.3
 
 		if (
-			this.y > 1 - this.model.max_y / frustum_slope / dist ||
-			this.y < -1 - this.model.min_y / frustum_slope / dist
+			this.y > 1 - scale * this.model.max_y / frustum_slope / dist ||
+			this.y < -1 - scale * this.model.min_y / frustum_slope / dist
 		) {
 			this.theta = -this.theta
 		}
 
 		if (
-			this.x > 1 - this.model.max_x / frustum_slope / dist ||
-			this.x < -1 - this.model.min_x / frustum_slope / dist
+			this.x > 1 - scale * this.model.max_x / frustum_slope / dist ||
+			this.x < -1 - scale * this.model.min_x / frustum_slope / dist
 		) {
 			this.theta = TAU / 2 - this.theta
 		}
@@ -361,8 +367,8 @@ class Dvd {
 		vp_matrix.multiply(proj_matrix)
 
 		const model_matrix = new Matrix(identity)
-		model_matrix.scale(1, 1, 0.5)
 		model_matrix.translate(this.x * frustum_slope * dist, this.y * frustum_slope * dist, 0)
+		model_matrix.scale(scale, scale, scale / 2)
 
 		// actual rendering
 
@@ -376,16 +382,14 @@ class Dvd {
 }
 
 class Radio {
-	constructor(gl) {
-		this.gl = gl
-		this.shader = new Shader(this.gl, "fullbright")
-
-		this.model_uniform = this.shader.uniform("u_model")
-		this.vp_uniform = this.shader.uniform("u_vp")
-		this.texture_uniform = this.shader.uniform("u_tex")
+	constructor(big_screen) {
+		this.big_screen = big_screen
+		this.gl = big_screen.gl
 
 		this.model = new Model(this.gl, radio_model)
 		this.texture = new Texture(this.gl, "res/radio.png")
+
+		this.logo = new Surf(big_screen, "res/radio-logo.png")
 	}
 
 	render(_dt, time) {
@@ -398,20 +402,32 @@ class Radio {
 		const vp_matrix = new Matrix(view_matrix)
 		vp_matrix.multiply(proj_matrix)
 
-		const model_matrix = new Matrix(identity)
-		model_matrix.translate(0, -3, 0)
-		model_matrix.scale(50, 50, 50)
-		model_matrix.rotate_2d(time, 0)
+		this.big_screen.fullbright_shader.use()
+		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
 
-		// actual rendering
+		// render radio
 
-		this.shader.use()
+		{
+			const model_mat = new Matrix(identity)
+			model_mat.translate(0, -3, 0)
+			model_mat.scale(50, 50, 50)
+			model_mat.rotate_2d(time, 0)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 
-		this.gl.uniformMatrix4fv(this.vp_uniform, false, vp_matrix.data.flat())
-		this.gl.uniformMatrix4fv(this.model_uniform, false, model_matrix.data.flat())
+			this.texture.use(this.big_screen.fullbright_texture_uniform)
+			this.model.draw(this.gl)
+		}
 
-		this.texture.use(this.texture_uniform)
-		this.model.draw(this.gl)
+		// render logo
+
+		{
+			const model_mat = new Matrix(identity)
+			model_mat.translate(0, 0, -1)
+			model_mat.scale(20, 15, 10)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+
+			this.logo.draw(this.gl)
+		}
 	}
 }
 
@@ -497,10 +513,18 @@ class BigScreen {
 		this.gl.viewport(0, 0, this.x_res, this.y_res)
 
 		this.gl.enable(this.gl.DEPTH_TEST)
-		this.gl.enable(this.gl.CULL_FACE)
+		// this.gl.enable(this.gl.CULL_FACE)
 
 		this.gl.enable(this.gl.BLEND)
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
+
+		// surface shader
+
+		this.fullbright_shader = new Shader(this.gl, "fullbright")
+
+		this.fullbright_model_uniform = this.fullbright_shader.uniform("u_model")
+		this.fullbright_vp_uniform = this.fullbright_shader.uniform("u_vp")
+		this.fullbright_texture_uniform = this.fullbright_shader.uniform("u_tex")
 
 		// different states
 		// - dvd: bouncing DVD "KAP" logo (default)
@@ -509,13 +533,13 @@ class BigScreen {
 		this.state = "dvd"
 
 		this.states = {
-			"dvd": new Dvd(this.gl),
+			"dvd": new Dvd(this),
 			"cse": new Cse(),
 			"cse-edit": new CseEdit(),
 			"guindaille": new Guindaille(),
 			"sacha": new Sacha(),
 			"infeau": new Infeau(),
-			"radio": new Radio(this.gl),
+			"radio": new Radio(this),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -598,6 +622,10 @@ class BigScreen {
 
 		if (this.state === "cse") {
 			colour = [1, 1, 0]
+		}
+
+		else if (this.state === "radio") {
+			colour = [0.816, 0.383, 0.328]
 		}
 
 		this.gl.clearColor(...colour, 1)

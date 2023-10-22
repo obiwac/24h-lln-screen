@@ -213,12 +213,15 @@ class Surf {
 
 		// create texture
 
-		this.texture = new Texture(this.gl, img_path)
+		if (img_path) {
+			this.texture = new Texture(this.gl, img_path)
+		}
 	}
 
 	draw() {
-		// this.big_screen.fullbright_shader.use()
-		this.texture.use(this.big_screen.fullbright_uniform)
+		if (this.texture) {
+			this.texture.use(this.big_screen.fullbright_uniform)
+		}
 
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vbo)
 		this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.ibo)
@@ -657,7 +660,7 @@ class Radio {
 			model_mat.scale(16, 30, 15)
 
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
-			this.banner.draw(this.gl)
+			this.banner.draw()
 
 			const offset = time / 5
 
@@ -667,7 +670,7 @@ class Radio {
 				model_mat.scale(15, 15, 15)
 
 				this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
-				this.activities[i].draw(this.gl)
+				this.activities[i].draw()
 			}
 		}
 
@@ -683,14 +686,14 @@ class Radio {
 			model_mat.scale(width, 7 * 1, 1)
 
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
-			this.marquee.draw(this.gl)
+			this.marquee.draw()
 
 			model_mat = new Matrix(identity)
 			model_mat.translate((time * speed) % width - width, this.marquee_height, 5)
 			model_mat.scale(7 * 4.8, 7 * 1, 1)
 
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
-			this.marquee.draw(this.gl)
+			this.marquee.draw()
 		}
 	}
 }
@@ -708,6 +711,12 @@ class Kapo {
 
 		this.rot = [0, 0]
 		this.target_rot = structuredClone(this.rot)
+
+		this.melt_shader = new Shader(this.gl, "melt")
+		this.melt = new Surf(this)
+
+		this.melt_u_time = this.melt_shader.uniform("iTime")
+		this.melt_u_res = this.melt_shader.uniform("iResolution")
 	}
 
 	enable() {
@@ -719,7 +728,7 @@ class Kapo {
 
 	render(dt, time) {
 		const proj_matrix = new Matrix()
-		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 0.1, 50)
+		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 0.1, 20)
 
 		const view_matrix = new Matrix()
 		view_matrix.translate(0, 0, -15)
@@ -727,10 +736,24 @@ class Kapo {
 		const vp_matrix = new Matrix(view_matrix)
 		vp_matrix.multiply(proj_matrix)
 
-		this.big_screen.fullbright_shader.use()
-		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
+		// render melt
+
+		this.gl.disable(this.gl.DEPTH_TEST)
+
+		{
+			this.melt_shader.use()
+			this.gl.uniform1f(this.melt_u_time, time)
+			this.gl.uniform2f(this.melt_u_res, this.big_screen.x_res, this.big_screen.y_res)
+
+			this.melt.draw(this.gl)
+		}
+
+		this.gl.enable(this.gl.DEPTH_TEST)
 
 		// render guitar
+
+		this.big_screen.fullbright_shader.use()
+		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
 
 		{
 			this.pos = anim_vec(this.pos, this.target_pos, dt * 3)

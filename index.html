@@ -152,6 +152,65 @@
 			}
 		</script>
 
+		<!-- melt shader -->
+		<!-- https://www.shadertoy.com/view/XsX3zl -->
+
+		<script id="melt-vert" type="x-shader/x-vertex">#version 300 es
+			precision mediump float;
+
+			layout(location = 0) in vec3 a_pos;
+
+			out vec2 fragCoord;
+
+			void main(void) {
+				gl_Position = vec4(a_pos * 2.0, 1.0);
+				fragCoord = a_pos.xy;
+			}
+		</script>
+
+		<script id="melt-frag" type="x-shader/x-fragment">#version 300 es
+			precision mediump float;
+			#define RADIANS 0.017453292519943295
+
+			uniform float iTime;
+			uniform vec2 iResolution;
+
+			const int zoom = 40;
+			const float brightness = 0.975;
+			float fScale = 1.25;
+
+			float cosRange(float degrees, float range, float minimum) {
+				return (((1.0 + cos(degrees * RADIANS)) * 0.5) * range) + minimum;
+			}
+
+			out vec4 fragColor;
+
+			void main(void)
+			{
+				vec2 fragCoord = gl_FragCoord.xy;
+				float time = iTime * 1.25;
+				vec2 uv = fragCoord.xy / iResolution.xy;
+				vec2 p  = (2.0*fragCoord.xy-iResolution.xy)/max(iResolution.x,iResolution.y);
+				float ct = cosRange(time*5.0, 3.0, 1.1);
+				float xBoost = cosRange(time*0.2, 5.0, 5.0);
+				float yBoost = cosRange(time*0.1, 10.0, 5.0);
+
+				fScale = cosRange(time * 15.5, 1.25, 0.5);
+
+				for(int i=1;i<zoom;i++) {
+					float _i = float(i);
+					vec2 newp=p;
+					newp.x+=0.25/_i*sin(_i*p.y+time*cos(ct)*0.5/20.0+0.005*_i)*fScale+xBoost;
+					newp.y+=0.25/_i*sin(_i*p.x+time*ct*0.3/40.0+0.03*float(i+15))*fScale+yBoost;
+					p=newp;
+				}
+
+				vec3 col=vec3(0.5*sin(3.0*p.x)+0.5,0.5*sin(3.0*p.y)+0.5,sin(p.x+p.y));
+				col *= brightness;
+
+				fragColor = vec4(col, 1.0);
+			}
+		</script>
 	</head>
 	<body>
 		<canvas id="canvas" class="overlay" width="480" height="288"></canvas>

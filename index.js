@@ -660,8 +660,12 @@ class BigScreen {
 	constructor() {
 		// WebGL setup
 
+		const config = {
+			alpha: false, // XXX alpha blends with the CSS background in WebGL contexts
+		}
+
 		const canvas = document.getElementById("canvas")
-		this.gl = canvas.getContext("webgl2") || canvas.getContext("experimental-webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
+		this.gl = canvas.getContext("webgl2", config) || canvas.getContext("experimental-webgl2", config) || canvas.getContext("webgl", config) || canvas.getContext("experimental-webgl", config)
 
 		if (!this.gl || (!(this.gl instanceof WebGLRenderingContext) && !(this.gl instanceof WebGL2RenderingContext))) {
 			canvas.hidden = true

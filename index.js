@@ -800,6 +800,61 @@ class Kapo {
 	}
 }
 
+class Salad {
+	constructor(big_screen) {
+		this.big_screen = big_screen
+		this.gl = big_screen.gl
+
+		this.model = new Model(this.gl, earth_model)
+		this.texture = new Texture(this.gl, "res/earth.jpg")
+
+		this.pos = [0, 0, 0]
+		this.target_pos = structuredClone(this.pos)
+
+		this.rot = [0, 0]
+		this.target_rot = structuredClone(this.rot)
+	}
+
+	enable() {
+		this.pos = [0, 0, 7]
+
+		this.rot = [0, TAU / 8]
+		this.target_rot = [0, 0]
+	}
+
+	render(dt, time) {
+		const proj_matrix = new Matrix()
+		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
+
+		const view_matrix = new Matrix()
+		view_matrix.translate(0, 0, -15)
+
+		const vp_matrix = new Matrix(view_matrix)
+		vp_matrix.multiply(proj_matrix)
+
+		this.big_screen.fullbright_shader.use()
+		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
+
+		// render earth
+
+		{
+			this.pos = anim_vec(this.pos, this.target_pos, dt * 3)
+			this.rot = anim_vec(this.rot, this.target_rot, dt * 3)
+
+			this.target_rot[0] += dt * 0.2
+
+			const model_mat = new Matrix(identity)
+			model_mat.translate(...this.pos)
+			model_mat.scale(7, 7, 7)
+			model_mat.rotate_2d(...this.rot)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+
+			this.texture.use(this.big_screen.fullbright_texture_uniform)
+			this.model.draw(this.gl)
+		}
+	}
+}
+
 class Cse {
 	constructor() {
 		this.warning_text = document.getElementById("cse-warning-text")
@@ -936,6 +991,7 @@ class BigScreen {
 			"radio": new Radio(this),
 			"kapo": new Kapo(this),
 			"textile": new Textile(this),
+			"salad": new Salad(this),
 			"decompte": new Decompte(),
 			"koty": new Kotyvideo(),
 		}
@@ -990,6 +1046,7 @@ class BigScreen {
 		else if (key === "o") this.state = "koty"
 		else if (key === "1") this.state = "112"
 		else if (key === "t") this.state = "textile"
+		else if (key === "l") this.state = "salad"
 		else this.state = "dvd"
 
 		// enable new state

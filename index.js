@@ -773,16 +773,6 @@ class Kotyvideo extends Video {
 	}
 }
 
-class Kot112 {
-	constructor() {
-		this.image = document.getElementById("112-image")
-		
-		setTimeout(() => {
-			big_screen.change_state("v")
-		}, 3000);
-	}
-}
-
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -850,7 +840,6 @@ class BigScreen {
 			"kapo": new Kapo(this),
 			"decompte": new Decompte(),
 			"koty": new Kotyvideo(),
-			"112": new Kot112(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -900,8 +889,8 @@ class BigScreen {
 		else if (key === "r") this.state = "radio"
 		else if (key === "d") this.state = "decompte"
 		else if (key === "k") this.state = "kapo"
-		else if (key == "o") this.state = "koty"
-		else if (key == "1") this.state = "112"
+		else if (key === "o") this.state = "koty"
+		else if (key === "1") this.state = "112"
 		else this.state = "dvd"
 
 		// enable new state

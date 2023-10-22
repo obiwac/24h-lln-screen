@@ -498,6 +498,12 @@ class Radio {
 
 		this.logo = new Surf(big_screen, "res/radio-logo.png")
 
+		this.activities = [
+			new Surf(big_screen, "res/podcast.png"),
+			new Surf(big_screen, "res/louiz.png"),
+			new Surf(big_screen, "res/materiel.png"),
+		]
+
 		this.pos = [-8.2, -9.4, 0]
 		this.target_pos = structuredClone(this.pos)
 
@@ -517,7 +523,7 @@ class Radio {
 		this.logo_pos = [-12.2, 15, -7]
 	}
 
-	render(dt, _time) {
+	render(dt, time) {
 		const proj_matrix = new Matrix()
 		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 2, 50)
 
@@ -559,6 +565,21 @@ class Radio {
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 
 			this.logo.draw(this.gl)
+		}
+
+		// render activities
+
+		{
+			const offset = time / 5
+
+			for (let i = 0; i < 3; i++) {
+				const model_mat = new Matrix(identity)
+				model_mat.translate(14, ((i + offset) % 3 - 1) * 20 - 13, 0)
+				model_mat.scale(15, 15, 15)
+
+				this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+				this.activities[i].draw(this.gl)
+			}
 		}
 	}
 }

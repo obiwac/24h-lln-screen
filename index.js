@@ -624,6 +624,14 @@ class CseEdit {
 }
 
 class Video {
+	constructor(id) {
+		this.video = document.getElementById(id)
+
+		this.video.addEventListener("ended", () => {
+			big_screen.change_state("v")
+		}, false)
+	}
+
 	enable() {
 		this.video.currentTime = 0
 		this.video.play()
@@ -636,8 +644,7 @@ class Video {
 
 class Guindaille extends Video {
 	constructor() {
-		super()
-		this.video = document.getElementById("guindaille-video")
+		super("guindaille-video")
 	}
 }
 
@@ -645,22 +652,19 @@ class Guindaille extends Video {
 
 class Sacha extends Video {
 	constructor() {
-		super()
-		this.video = document.getElementById("sacha-video")
+		super("sacha-video")
 	}
 }
 
 class Infeau extends Video {
 	constructor() {
-		super()
-		this.video = document.getElementById("infeau-video")
+		super("infeau-video")
 	}
 }
 
 class Decompte extends Video {
 	constructor(){
-		super()
-		this.video = document.getElementById("decompte-video")
+		super("decompte-video")
 	}
 }
 

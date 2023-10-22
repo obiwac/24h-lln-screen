@@ -538,6 +538,9 @@ class Radio {
 
 		this.logo_pos = [-12.2, 8.1, -5]
 		this.target_logo_pos = structuredClone(this.logo_pos)
+
+		this.banner_pos = [14, 0, -0.01]
+		this.target_banner_pos = structuredClone(this.banner_pos)
 	}
 
 	enable() {
@@ -547,6 +550,7 @@ class Radio {
 		this.target_rot = [0, 0]
 
 		this.logo_pos = [-12.2, 15, -7]
+		this.banner_pos = [14, 30, -0.01]
 	}
 
 	render(dt, time) {
@@ -596,9 +600,10 @@ class Radio {
 		// render activities
 
 		{
+			this.banner_pos = anim_vec(this.banner_pos, this.target_banner_pos, dt * 3)
 			const model_mat = new Matrix(identity)
-			model_mat.translate(14, 0, -0.01)
-			model_mat.scale(16, 100, 15)
+			model_mat.translate(...this.banner_pos)
+			model_mat.scale(16, 30, 15)
 
 			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
 			this.banner.draw(this.gl)

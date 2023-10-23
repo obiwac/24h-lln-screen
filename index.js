@@ -1009,25 +1009,25 @@ class Decompte extends Video {
 	}
 }
 
-class Kotyvideo extends Video {
+class KotyVideo extends Video {
 	constructor(){
 		super("koty-video")
 	}
 }
 
-class Organevideo extends Video {
+class OrganeVideo extends Video {
 	constructor(){
 		super("organe-video")
 	}
 }
 
-class Photovideo extends Video {
+class PhotoVideo extends Video {
 	constructor(){
 		super("photo-video")
 	}
 }
 
-class Certyvideo extends Video {
+class CertiVideo extends Video {
 	constructor(){
 		super("certyno-video")
 	}
@@ -1038,9 +1038,16 @@ class CarpeVideo extends Video {
 		super("carpe-video")
 	}
 }
+
 class Carpe2Video extends Video {
 	constructor(){
 		super("carpe2-video")
+	}
+}
+
+class CircoVideo extends Video {
+	constructor(){
+		super("circo-video")
 	}
 }
 
@@ -1065,6 +1072,7 @@ const OVERLAYS = {
 	"fairkot": "fairkot",
 	"carpe": "carpe",
 	"carpe2": "carpe2",
+	"circo": "circo",
 }
 
 class BigScreen {
@@ -1121,13 +1129,14 @@ class BigScreen {
 			"textile": new Textile(this),
 			"salad": new Salad(this),
 			"decompte": new Decompte(),
-			"koty": new Kotyvideo(),
-			"photo": new Photovideo(),
+			"koty": new KotyVideo(),
+			"photo": new PhotoVideo(),
 			"auk": new Auk(this),
-			"organe": new Organevideo(),
-			"certyno": new Certyvideo(),
+			"organe": new OrganeVideo(),
+			"certyno": new CertiVideo(),
 			"carpe": new CarpeVideo(),
 			"carpe2": new Carpe2Video(),
+			"circo": new CircoVideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1191,6 +1200,7 @@ class BigScreen {
 		else if (key === "f") this.state = "fairkot"
 		else if (key === "4") this.state = "carpe"
 		else if (key === "5") this.state = "carpe2"
+		else if (key === "6") this.state = "circo"
 		else this.state = "dvd"
 
 		// enable new state

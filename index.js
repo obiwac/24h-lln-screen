@@ -1305,11 +1305,7 @@ class BigScreen {
 
 		let colour = [0, 0, 0]
 
-		if (this.state === "cse") {
-			colour = [1, 1, 0]
-		}
-
-		else if (this.state === "radio") {
+		if (this.state === "radio") {
 			colour = [0.816, 0.383, 0.328]
 		}
 

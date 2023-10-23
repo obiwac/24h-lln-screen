@@ -969,7 +969,7 @@ class Video {
 		this.video = document.getElementById(id)
 
 		this.video.addEventListener("ended", () => {
-			big_screen.change_state("v")
+			big_screen.change_state("]")
 		}, false)
 	}
 

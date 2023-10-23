@@ -1142,6 +1142,35 @@ const OVERLAYS = {
 	"electro": "electro",
 }
 
+let state_order = ["g",
+"s",
+"i",
+"r",
+"k",
+"o",
+"1",
+"v",
+"t",
+"l",
+"p",
+"a",
+"2",
+"y",
+"m",
+"3",
+"f",
+"4",
+"5",
+"6",
+"7",
+"8"
+]
+
+let state_ptr = 0
+let auto = false
+let screen_time = 30
+let screen_timer = screen_time
+
 class BigScreen {
 	constructor() {
 		// WebGL setup
@@ -1226,8 +1255,31 @@ class BigScreen {
 		requestAnimationFrame(now => this.render(now))
 	}
 
-	change_state(key) {
+	shuffle(array) {
+		let currentIndex = array.length,  randomIndex;
+
+		// While there remain elements to shuffle.
+		while (currentIndex > 0) {
+
+		  // Pick a remaining element.
+		  randomIndex = Math.floor(Math.random() * currentIndex);
+		  currentIndex--;
+
+		  // And swap it with the current element.
+		  [array[currentIndex], array[randomIndex]] = [
+			array[randomIndex], array[currentIndex]];
+		}
+
+		return array;
+	  }
+
+	change_state(key, from_auto) {
 		// disable overlay of previous state
+		console.log(from_auto)
+		if(from_auto !== true && key !== "]"){
+			console.log("ici")
+			auto = false
+		}
 
 		if (OVERLAYS[this.state]) {
 			const overlay = document.getElementById(OVERLAYS[this.state])
@@ -1272,6 +1324,12 @@ class BigScreen {
 		else if (key === "6") this.state = "circo"
 		else if (key === "7") this.state = "kaptech"
 		else if (key === "8") this.state = "electro"
+		else if (key === "0"){
+			auto = true
+			state_ptr = 0
+			screen_timer = screen_time
+			state_order = this.shuffle(state_order)
+		}
 		else this.state = "dvd"
 
 		// enable new state
@@ -1304,6 +1362,16 @@ class BigScreen {
 		const time = now / 1000
 
 		let colour = [0, 0, 0]
+
+		if (auto){
+			screen_timer += dt
+			if (screen_timer >= screen_time){
+				this.change_state(state_order[state_ptr], true)
+				state_ptr += 1
+				if(state_ptr >= state_order.length) state_ptr = 0
+				screen_timer = 0
+			}
+		}
 
 		if (this.state === "radio") {
 			colour = [0.816, 0.383, 0.328]

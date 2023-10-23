@@ -1033,6 +1033,17 @@ class Certyvideo extends Video {
 	}
 }
 
+class CarpeVideo extends Video {
+	constructor(){
+		super("carpe-video")
+	}
+}
+class Carpe2Video extends Video {
+	constructor(){
+		super("carpe2-video")
+	}
+}
+
 // map of state names to HTML overlay element's id
 
 const OVERLAYS = {
@@ -1052,6 +1063,8 @@ const OVERLAYS = {
 	"verdom": "verdom",
 	"manga": "manga",
 	"fairkot": "fairkot",
+	"carpe": "carpe",
+	"carpe2": "carpe2",
 }
 
 class BigScreen {
@@ -1113,6 +1126,8 @@ class BigScreen {
 			"auk": new Auk(this),
 			"organe": new Organevideo(),
 			"certyno": new Certyvideo(),
+			"carpe": new CarpeVideo(),
+			"carpe2": new Carpe2Video(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1174,6 +1189,8 @@ class BigScreen {
 		else if (key === "m") this.state = "manga"
 		else if (key === "3") this.state = "verdom"
 		else if (key === "f") this.state = "fairkot"
+		else if (key === "4") this.state = "carpe"
+		else if (key === "5") this.state = "carpe2"
 		else this.state = "dvd"
 
 		// enable new state

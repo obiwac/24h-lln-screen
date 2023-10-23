@@ -803,6 +803,66 @@ class Kapo {
 	}
 }
 
+class Kaptech {
+	constructor(big_screen) {
+		this.big_screen = big_screen
+		this.gl = big_screen.gl
+
+		this.bg_pos = [0, 0, 0]
+		this.target_bg_pos = structuredClone(this.bg_pos)
+		this.background = new Surf(big_screen, "res/kaptech.png")
+
+		this.circuit_shader = new Shader(this.gl, "circuit")
+		this.circuit = new Surf(big_screen)
+
+		this.circuit_u_time = this.circuit_shader.uniform("iTime")
+		this.circuit_u_res = this.circuit_shader.uniform("iResolution")
+	}
+
+	enable() {
+		this.bg_pos = [0, 0, 15]
+	}
+
+	render(dt, time) {
+		const proj_matrix = new Matrix()
+		proj_matrix.perspective(TAU / 4, this.big_screen.aspect_ratio, 0.1, 20)
+
+		const view_matrix = new Matrix()
+		view_matrix.translate(0, 0, -15)
+
+		const vp_matrix = new Matrix(view_matrix)
+		vp_matrix.multiply(proj_matrix)
+
+		// render circuit
+
+		this.gl.disable(this.gl.DEPTH_TEST)
+
+		{
+			this.circuit_shader.use()
+			this.gl.uniform1f(this.circuit_u_time, (time + 100) % 1000)
+			this.gl.uniform2f(this.circuit_u_res, this.big_screen.x_res, this.big_screen.y_res)
+
+			this.circuit.draw(this.gl)
+		}
+
+		this.gl.enable(this.gl.DEPTH_TEST)
+
+		// render background
+
+		this.big_screen.fullbright_shader.use()
+		this.gl.uniformMatrix4fv(this.big_screen.fullbright_vp_uniform, false, vp_matrix.data.flat())
+
+		{
+			this.bg_pos = anim_vec(this.bg_pos, this.target_bg_pos, dt * 3)
+			const model_mat = new Matrix(identity)
+			model_mat.scale(50, 30, 1) // 50 30
+			model_mat.translate(...this.bg_pos)
+			this.gl.uniformMatrix4fv(this.big_screen.fullbright_model_uniform, false, model_mat.data.flat())
+			this.background.draw(this.gl)
+		}
+	}
+}
+
 class Salad {
 	constructor(big_screen) {
 		this.big_screen = big_screen
@@ -1137,6 +1197,7 @@ class BigScreen {
 			"carpe": new CarpeVideo(),
 			"carpe2": new Carpe2Video(),
 			"circo": new CircoVideo(),
+			"kaptech": new Kaptech(this),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1201,6 +1262,7 @@ class BigScreen {
 		else if (key === "4") this.state = "carpe"
 		else if (key === "5") this.state = "carpe2"
 		else if (key === "6") this.state = "circo"
+		else if (key === "7") this.state = "kaptech"
 		else this.state = "dvd"
 
 		// enable new state

@@ -1024,16 +1024,65 @@ class CseEdit {
 	}
 }
 
+let state_order = ["g",
+"s",
+"i",
+"r",
+"k",
+"o",
+"1",
+"v",
+"t",
+"l",
+"p",
+"a",
+"2",
+"y",
+"m",
+"3",
+"f",
+"4",
+"5",
+"6",
+"7",
+"8",
+"9",
+]
+
+let video = [
+	"9",
+	"g",
+	"s",
+	"i",
+	"o",
+	"2",
+	"y",
+	"p",
+	"8",
+	"4",
+	"5",
+	"6"
+]
+
+let state_ptr = 0
+let auto = false
+let default_screen_time = 30
+let screen_time = default_screen_time
+let screen_timer = screen_time
+
 class Video {
 	constructor(id) {
 		this.video = document.getElementById(id)
-
 		this.video.addEventListener("ended", () => {
 			big_screen.change_state("]")
 		}, false)
+		this.id = id
 	}
 
 	enable() {
+		screen_time = this.video.duration
+		console.log("screen time duration : ", screen_time)
+		console.log(this.id)
 		this.video.currentTime = 0
 		this.video.play()
 	}
@@ -1084,6 +1133,12 @@ class OrganeVideo extends Video {
 class PhotoVideo extends Video {
 	constructor(){
 		super("photo-video")
+	}
+}
+
+class CseVideo extends Video {
+	constructor(){
+		super("cse-video")
 	}
 }
 
@@ -1140,36 +1195,8 @@ const OVERLAYS = {
 	"carpe2": "carpe2",
 	"circo": "circo",
 	"electro": "electro",
+	"cse-vid": "cse-vid",
 }
-
-let state_order = ["g",
-"s",
-"i",
-"r",
-"k",
-"o",
-"1",
-"v",
-"t",
-"l",
-"p",
-"a",
-"2",
-"y",
-"m",
-"3",
-"f",
-"4",
-"5",
-"6",
-"7",
-"8"
-]
-
-let state_ptr = 0
-let auto = false
-let screen_time = 30
-let screen_timer = screen_time
 
 class BigScreen {
 	constructor() {
@@ -1235,6 +1262,7 @@ class BigScreen {
 			"circo": new CircoVideo(),
 			"kaptech": new Kaptech(this),
 			"electro": new ElectroVideo(),
+			"cse-vid": new CseVideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1275,9 +1303,7 @@ class BigScreen {
 
 	change_state(key, from_auto) {
 		// disable overlay of previous state
-		console.log(from_auto)
 		if(from_auto !== true && key !== "]"){
-			console.log("ici")
 			auto = false
 		}
 
@@ -1324,6 +1350,7 @@ class BigScreen {
 		else if (key === "6") this.state = "circo"
 		else if (key === "7") this.state = "kaptech"
 		else if (key === "8") this.state = "electro"
+		else if (key === "9") this.state = "cse-vid"
 		else if (key === "0"){
 			auto = true
 			state_ptr = 0
@@ -1367,8 +1394,11 @@ class BigScreen {
 			screen_timer += dt
 			if (screen_timer >= screen_time){
 				this.change_state(state_order[state_ptr], true)
+				if(video.includes(state_order[state_ptr]) === false)  {
+					screen_time = default_screen_time
+				}
 				state_ptr += 1
-				if(state_ptr >= state_order.length) state_ptr = 0
+				if(state_ptr >= state_order.length) auto = false
 				screen_timer = 0
 			}
 		}

@@ -34,6 +34,7 @@ De temps en temps il faut passer aussi la vidéo de prévention.
 | g  |    Guindaille 2.0     |
 | s  |    Plan sacha         |
 | i  |    Infeau             |
+| 9  |    Promotion CSE      |
 
 ### A passer pdt le concert du certino
 Touche "y" -> lance une vidéo de promotion du certino, à pacer on boucle pdt leur concert.
@@ -52,6 +53,8 @@ Touche "y" -> lance une vidéo de promotion du certino, à pacer on boucle pdt l
 | 6  |    circo     |
 | 7  |    kaptech     |
 | 8  |    electro     |
+
+Vous pouvez apuiller sur 0 pour faire un défilement automatique, si vous apuillez sur une autre touche pendant le défilement, il s'arrêteras il faudras recommencer.
 
 ### Affiches inanimées des kaps
 | Touche | KAP |

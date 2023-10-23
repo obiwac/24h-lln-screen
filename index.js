@@ -1087,6 +1087,12 @@ class PhotoVideo extends Video {
 	}
 }
 
+class ElectroVideo extends Video {
+	constructor(){
+		super("electro-video")
+	}
+}
+
 class CertiVideo extends Video {
 	constructor(){
 		super("certyno-video")
@@ -1133,6 +1139,7 @@ const OVERLAYS = {
 	"carpe": "carpe",
 	"carpe2": "carpe2",
 	"circo": "circo",
+	"electro": "electro",
 }
 
 class BigScreen {
@@ -1198,6 +1205,7 @@ class BigScreen {
 			"carpe2": new Carpe2Video(),
 			"circo": new CircoVideo(),
 			"kaptech": new Kaptech(this),
+			"electro": new ElectroVideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1263,6 +1271,7 @@ class BigScreen {
 		else if (key === "5") this.state = "carpe2"
 		else if (key === "6") this.state = "circo"
 		else if (key === "7") this.state = "kaptech"
+		else if (key === "8") this.state = "electro"
 		else this.state = "dvd"
 
 		// enable new state

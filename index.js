@@ -1048,6 +1048,7 @@ let state_order = ["g",
 "8",
 "9",
 "-",
+"j",
 ]
 
 let video = [
@@ -1205,6 +1206,7 @@ const OVERLAYS = {
 	"electro": "electro",
 	"cse-vid": "cse-vid",
 	"kap": "kap",
+	"linux": "linux",
 }
 
 class BigScreen {
@@ -1362,6 +1364,7 @@ class BigScreen {
 		else if (key === "8") this.state = "electro"
 		else if (key === "9") this.state = "cse-vid"
 		else if (key === '-') this.state = "kap"
+		else if (key === 'j') this.state = "linux"
 		else if (key === "0"){
 			auto = true
 			state_ptr = 0

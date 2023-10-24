@@ -65,6 +65,7 @@ Vous pouvez apuiller sur 0 pour faire un défilement automatique, si vous apuill
 | 3  |    verdom    |
 | f  |    fairkot   |
 | j  |    bar du linux   |
+| z  |    kotangente   |
 
 Touche "b" -> affiche un message d'erreur windows -> demander à Aymeric pq il a fait ça
 

@@ -1047,9 +1047,10 @@ let state_order = ["g",
 "7",
 "8",
 "9",
-"-",
 "j",
 "z",
+"-",
+"°",
 ]
 
 let video = [
@@ -1065,7 +1066,6 @@ let video = [
 	"4",
 	"5",
 	"6",
-	"-"
 ]
 
 let state_ptr = 0
@@ -1140,12 +1140,6 @@ class PhotoVideo extends Video {
 	}
 }
 
-class KAPVideo extends Video {
-	constructor(){
-		super("kap-video")
-	}
-}
-
 class CseVideo extends Video {
 	constructor(){
 		super("cse-video")
@@ -1206,9 +1200,10 @@ const OVERLAYS = {
 	"circo": "circo",
 	"electro": "electro",
 	"cse-vid": "cse-vid",
-	"kap": "kap",
 	"linux": "linux",
 	"kotan": "kotan",
+	"lineupjour": "lineupjour",
+	"lineupnuit": "lineupnuit",
 }
 
 class BigScreen {
@@ -1276,7 +1271,6 @@ class BigScreen {
 			"kaptech": new Kaptech(this),
 			"electro": new ElectroVideo(),
 			"cse-vid": new CseVideo(),
-			"kap": new KAPVideo(),
 		}
 
 		window.addEventListener("keypress", e => {
@@ -1365,9 +1359,10 @@ class BigScreen {
 		else if (key === "7") this.state = "kaptech"
 		else if (key === "8") this.state = "electro"
 		else if (key === "9") this.state = "cse-vid"
-		else if (key === '-') this.state = "kap"
 		else if (key === 'j') this.state = "linux"
 		else if (key === 'z') this.state = "kotan"
+		else if (key === '-') this.state = "lineupjour"
+		else if (key === "°") this.state = "lineupnuit"
 		else if (key === "0"){
 			auto = true
 			state_ptr = 0
